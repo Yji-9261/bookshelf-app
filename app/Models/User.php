@@ -70,7 +70,7 @@ class User extends Authenticatable
     public function likeReviews(): BelongsToMany
     {
         // 外部キーはuser_idとreview_idで規約通りのため省略
-        return $this->belongsToMany(Review::class, 'review_likes');
+        return $this->belongsToMany(Review::class, 'review_likes')->withTimestamps();
     }
 
     /**
@@ -80,6 +80,6 @@ class User extends Authenticatable
     public function favoriteBooks(): BelongsToMany
     {
         // 外部キーはuser_idとbook_idで規約通りのため省略
-        return $this->belongsToMany(Book::class, 'favorites');
+        return $this->belongsToMany(Book::class, 'favorites')->withTimestamps();
     }
 }

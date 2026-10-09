@@ -21,6 +21,6 @@ class Genre extends Model
     public function books(): BelongsToMany
     {
         // 中間テーブル名(book_genre)、外部キーは規約通りのため省略
-        return $this->belongsToMany(Book::class);
+        return $this->belongsToMany(Book::class)->withTimestamps();
     }
 }

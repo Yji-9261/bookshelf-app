@@ -41,6 +41,7 @@ class CreateNewUser implements CreatesNewUsers
                 'email.required' => 'メールアドレスを入力してください',
                 'email.email' => 'メールアドレスをメール形式で入力してください',
                 'email.max' => 'メールアドレスを255文字以内で入力してください',
+                'email.unique' => 'このメールアドレスはすでに登録されています',
                 'password.required' => 'パスワードを入力してください',
                 'password.min' => 'パスワードを8文字以上で入力してください',
                 'password.confirmed' => 'パスワードと一致しません',

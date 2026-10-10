@@ -4,6 +4,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\ReviewController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,8 +16,10 @@ use App\Http\Controllers\BookController;
 |
 */
 
+/** 書籍 */
 Route::get('/', [BookController::class, 'index'])
     ->name('books.index');
+
 Route::get('/books', function () {
     return redirect('/');
 })->name('books.index');
@@ -45,10 +48,25 @@ Route::delete('/books/{book}', [BookController::class, 'destroy'])
     ->name('books.destroy');
 
 
+/** レビュー */
 Route::middleware(['auth'])->group(function () {
-    //    Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])
+        ->name('reviews.store');
+
+    Route::get('/reviews/{review}/edit', [ReviewController::class, 'edit'])
+        ->name('reviews.edit');
+
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])
+        ->name('reviews.update');
+
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('reviews.destroy');
+});
 
 
+
+
+Route::middleware(['auth'])->group(function () {
     Route::get('/ranking', function () {
         return view('ranking.index');
     })->name('ranking.index');
@@ -65,11 +83,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/books/{book}/favorites', function ($book) {
         return view('genres.index');
     })->name('favorites.toggle');
-
-    // レビュー投稿
-    Route::post('/books/{book}/reviews', function () {
-        return view('genres.index');
-    })->name('reviews.store');
 
     // いいね
     Route::post('/reviews/{review}/like', function () {

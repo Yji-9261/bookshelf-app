@@ -40,7 +40,7 @@ class Review extends Model
      * レビューに対するいいね
      * @return BelongsToMany
      */
-    public function favoriteUsers(): BelongsToMany
+    public function likedByUsers(): BelongsToMany
     {
         // 外部キーはuser_idとreview_idで規約通りのため省略
         return $this->belongsToMany(User::class, 'review_likes')->withTimestamps();

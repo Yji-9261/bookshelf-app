@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Http\Requests\StoreUpdateBookRequest;
 
 class Book extends Model
 {
@@ -15,9 +16,11 @@ class Book extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'anthor',
+        'author',
         'isbn',
         'published_date',
+        'description',
+        'image_url',
     ];
 
     /**

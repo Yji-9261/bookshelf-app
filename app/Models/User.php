@@ -49,7 +49,7 @@ class User extends Authenticatable
      * 登録した書籍
      * @return HasMany
      */
-    public function registerBooks(): HasMany
+    public function registeredBooks(): HasMany
     {
         return $this->hasMany(Book::class);
     }
@@ -67,7 +67,7 @@ class User extends Authenticatable
      * レビューに対するいいね
      * @return BelongsToMany
      */
-    public function likeReviews(): BelongsToMany
+    public function likedReviews(): BelongsToMany
     {
         // 外部キーはuser_idとreview_idで規約通りのため省略
         return $this->belongsToMany(Review::class, 'review_likes')->withTimestamps();

@@ -3,6 +3,7 @@
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Database\Eloquent\Collection;
+use App\Http\Controllers\BookController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,18 +15,39 @@ use \Illuminate\Database\Eloquent\Collection;
 |
 */
 
-Route::get('/', function () {
-    return view('books.index', ['books' => new Collection()]);
-})->name('books.index');
+Route::get('/', [BookController::class, 'index'])
+    ->name('books.index');
 Route::get('/books', function () {
     return redirect('/');
 })->name('books.index');
 
+Route::get('/books/create', [BookController::class, 'create'])
+    ->middleware(['auth'])
+    ->name('books.create');
+
+Route::post('/books/create', [BookController::class, 'store'])
+    ->middleware(['auth'])
+    ->name('books.store');
+
+Route::get('/books/{book}', [BookController::class, 'show'])
+    ->name('books.show');
+
+Route::get('/books/{book}/edit', [BookController::class, 'edit'])
+    ->middleware(['auth'])
+    ->name('books.edit');
+
+Route::put('/books/{book}', [BookController::class, 'update'])
+    ->middleware(['auth'])
+    ->name('books.update');
+
+Route::delete('/books/{book}', [BookController::class, 'destroy'])
+    ->middleware(['auth'])
+    ->name('books.destroy');
+
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/books/create', function () {
-        return view('books.create');
-    })->name('books.create');
+    //    Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
+
 
     Route::get('/ranking', function () {
         return view('ranking.index');
@@ -38,5 +60,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/genres', function () {
         return view('genres.index');
     })->name('genres.index');
+
+    // お気に入り登録
+    Route::post('/books/{book}/favorites', function ($book) {
+        return view('genres.index');
+    })->name('favorites.toggle');
+
+    // レビュー投稿
+    Route::post('/books/{book}/reviews', function () {
+        return view('genres.index');
+    })->name('reviews.store');
+
+    // いいね
+    Route::post('/reviews/{review}/like', function () {
+        return view('genres.index');
+    })->name('reviews.like');
 });
 

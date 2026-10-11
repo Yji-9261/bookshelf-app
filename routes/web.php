@@ -4,6 +4,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\GenreController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\ReviewController;
@@ -87,7 +88,26 @@ Route::get('/ranking', [RankingController::class, 'index'])
     ->name('ranking.index');
 
 
-/** ランキング */
-Route::get('/genres', function () {
-    return view('genres.index');
-})->name('genres.index');
+/** ジャンル */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/genres', [GenreController::class, 'index'])
+        ->name('genres.index');
+
+    Route::post('/genres', [GenreController::class, 'store'])
+        ->name('genres.store');
+
+    Route::get('/genres/create', [GenreController::class, 'create'])
+        ->name('genres.create');
+
+    Route::get('/genres/{genre}', [GenreController::class, 'show'])
+        ->name('genres.show');
+
+    Route::get('/genres/{genre}/edit', [GenreController::class, 'edit'])
+        ->name('genres.edit');
+
+    Route::put('/genres/{genre}', [GenreController::class, 'update'])
+        ->name('genres.update');
+
+    Route::delete('/genres/{genre}', [GenreController::class, 'destroy'])
+        ->name('genres.destroy');
+});

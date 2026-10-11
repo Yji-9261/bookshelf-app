@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use \Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\RankingController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReviewLikeController;
 
@@ -81,16 +82,12 @@ Route::middleware(['auth'])->group(function () {
         ->name('reviews.like');
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/ranking', function () {
-        return view('ranking.index');
-    })->name('ranking.index');
+/** ランキング */
+Route::get('/ranking', [RankingController::class, 'index'])
+    ->name('ranking.index');
 
 
-    Route::get('/genres', function () {
-        return view('genres.index');
-    })->name('genres.index');
-
-
-});
-
+/** ランキング */
+Route::get('/genres', function () {
+    return view('genres.index');
+})->name('genres.index');

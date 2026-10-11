@@ -17,7 +17,8 @@ class BookController extends Controller
     public function index(): View
     {
         return View('books.index', [
-            'books' => Book::paginate(10)
+            // 平均評価点算出のため書籍に紐ついたレビューを参照
+            'books' => Book::with('reviews')->paginate(10)
         ]);
     }
 

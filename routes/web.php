@@ -4,7 +4,10 @@ use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use \Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ReviewLikeController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -63,30 +66,31 @@ Route::middleware(['auth'])->group(function () {
         ->name('reviews.destroy');
 });
 
+/** お気に入り */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/favorites', [FavoriteController::class, 'index'])
+        ->name('favorites.index');
 
+    Route::post('/book/{book}/favorites', [FavoriteController::class, 'store'])
+        ->name('favorites.toggle');
+});
 
+/** いいね */
+Route::middleware(['auth'])->group(function () {
+    Route::post('/reviews/{review}/like', [ReviewLikeController::class, 'store'])
+        ->name('reviews.like');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/ranking', function () {
         return view('ranking.index');
     })->name('ranking.index');
 
-    Route::get('/favorites', function () {
-        return view('favorites.index');
-    })->name('favorites.index');
 
     Route::get('/genres', function () {
         return view('genres.index');
     })->name('genres.index');
 
-    // お気に入り登録
-    Route::post('/books/{book}/favorites', function ($book) {
-        return view('genres.index');
-    })->name('favorites.toggle');
 
-    // いいね
-    Route::post('/reviews/{review}/like', function () {
-        return view('genres.index');
-    })->name('reviews.like');
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,5 +60,19 @@ class Book extends Model
     {
         // 外部キーは規約通り名称のため省略
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
+
+    /**
+     * 平均評価点を返す
+     * 
+     * @return Attribute
+     */
+    public function reviewsAvgRating(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                return $this->reviews()->get()->average('rating');
+            }
+        );
     }
 }

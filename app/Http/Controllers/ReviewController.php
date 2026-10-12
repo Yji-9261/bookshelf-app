@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Review;
 use App\Http\Requests\StoreUpdateReviewRequest;
-use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
@@ -36,7 +35,8 @@ class ReviewController extends Controller
         $validated['book_id'] = $book->id;
         $request->user()->postReviews()->create($validated);
 
-        return redirect(route('books.show', ['book' => $book]))->with('success', 'レビューを投稿しました。');
+        return redirect(route('books.show', ['book' => $book]))
+            ->with('success', 'レビューを投稿しました。');
     }
 
     /**
@@ -65,7 +65,8 @@ class ReviewController extends Controller
         $this->authorize('update', $review);
         $review->update($request->validated());
 
-        return redirect(route('books.show', ['book' => $review->book]));
+        return redirect(route('books.show', ['book' => $review->book]))
+            ->with('success', 'レビューを更新しました。');
     }
 
     /**

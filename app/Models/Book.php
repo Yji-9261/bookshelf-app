@@ -71,7 +71,7 @@ class Book extends Model
     {
         return Attribute::make(
             get: function () {
-                return $this->reviews()->get()->average('rating');
+                return (float) $this->reviews()->avg('rating');
             }
         );
     }

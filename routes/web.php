@@ -29,29 +29,27 @@ Route::get('/books', function () {
     return redirect('/');
 })->name('books.index');
 
-Route::get('/books/create', [BookController::class, 'create'])
-    ->middleware(['auth'])
-    ->name('books.create');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/books/create', [BookController::class, 'create'])
+        ->name('books.create');
 
-Route::post('/books/create', [BookController::class, 'store'])
-    ->middleware(['auth'])
-    ->name('books.store');
+    Route::post('/books/create', [BookController::class, 'store'])
+        ->name('books.store');
+});
 
 Route::get('/books/{book}', [BookController::class, 'show'])
     ->name('books.show');
 
-Route::get('/books/{book}/edit', [BookController::class, 'edit'])
-    ->middleware(['auth'])
-    ->name('books.edit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/books/{book}/edit', [BookController::class, 'edit'])
+        ->name('books.edit');
 
-Route::put('/books/{book}', [BookController::class, 'update'])
-    ->middleware(['auth'])
-    ->name('books.update');
+    Route::put('/books/{book}', [BookController::class, 'update'])
+        ->name('books.update');
 
-Route::delete('/books/{book}', [BookController::class, 'destroy'])
-    ->middleware(['auth'])
-    ->name('books.destroy');
-
+    Route::delete('/books/{book}', [BookController::class, 'destroy'])
+        ->name('books.destroy');
+});
 
 /** レビュー */
 Route::middleware(['auth'])->group(function () {
@@ -86,7 +84,6 @@ Route::middleware(['auth'])->group(function () {
 /** ランキング */
 Route::get('/ranking', [RankingController::class, 'index'])
     ->name('ranking.index');
-
 
 /** ジャンル */
 Route::middleware(['auth'])->group(function () {

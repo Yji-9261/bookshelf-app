@@ -30,7 +30,7 @@ class Book extends Model
      */
     public function registerUser(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

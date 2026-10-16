@@ -27,7 +27,7 @@ class ReviewLikeSeeder extends Seeder
             $numbers = fake()->randomElements($randmoUserIds, $random);
 
             // いいねユーザーを紐つける
-            $review->favoriteUsers()->syncWithoutDetaching($numbers);
+            $review->likedByUsers()->syncWithoutDetaching($numbers);
         }
     }
 }

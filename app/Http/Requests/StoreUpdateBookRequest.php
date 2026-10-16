@@ -60,7 +60,7 @@ class StoreUpdateBookRequest extends FormRequest
             'isbn.unique' => 'このISBNは登録済みです',
 
             'published_date.required' => '出版日を入力してください',
-            'published_date.date_format' => '出版日をYYYY年MM月DD日形式で入力してください',
+            'published_date.date_format' => '出版日をyyyy/mm/dd形式で入力してください',
 
             'genres.required' => 'ジャンルを選択してください',
 

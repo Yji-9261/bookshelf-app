@@ -25,8 +25,9 @@ class RankingController extends Controller
      */
     private function getRankedBooks(): Collection
     {
-        // 平均評価top10を降順で取得する
+        // レビューが存在が存在する、平均評価top10を降順で取得する
         $books = Book::with('reviews')
+            ->has('reviews')
             ->limit(10)
             ->get()
             ->sortByDesc(fn($book) => $book->reviews_avg_rating);

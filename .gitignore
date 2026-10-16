@@ -20,3 +20,4 @@ yarn-error.log
 *.jpeg
 *.png
 *.isue
+.DS_Store

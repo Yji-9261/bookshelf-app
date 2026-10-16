@@ -30,12 +30,12 @@ class StoreUpdateReviewRequest extends FormRequest
     public function messages()
     {
         return [
-            'rating.required' => '評価を入力してください。',
-            'rating.integer' => '評価は数値を入力してください。',
-            'rating.min' => '評価は１以上の数値を入力してください。',
-            'rating.max' => '評価は５以下の数値を入力してください。',
+            'rating.required' => '評価を入力してください',
+            'rating.integer' => '評価は数値を入力してください',
+            'rating.min' => '評価は１以上の数値を入力してください',
+            'rating.max' => '評価は５以下の数値を入力してください',
 
-            'comment' => 'コメントを入力してください。',
+            'comment' => 'コメントを入力してください',
         ];
     }
 }

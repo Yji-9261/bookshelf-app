@@ -140,7 +140,7 @@ class BookSeeder extends Seeder
             // 不要な'ジャンル'キーを削除しbookを生成
             unset($value['ジャンル']);
             // user id=1 山田太郎固定
-            $book = User::first()->registerBooks()->firstOrCreate($value);
+            $book = User::first()->registeredBooks()->firstOrCreate($value);
 
             // ジャンル名から該当するID群を取得し、書籍にジャンル紐つけ
             $genreIds = Genre::whereIn('name', $genreNames)->pluck('id');

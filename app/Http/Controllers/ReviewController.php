@@ -54,7 +54,7 @@ class ReviewController extends Controller
     {
         $this->authorize('update', $review);
 
-        return View('/reviews.edit', ['review' => $review]);
+        return View('reviews.edit', ['review' => $review]);
     }
 
     /**

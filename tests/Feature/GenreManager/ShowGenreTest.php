@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Genre;
 
 use App\Models\User;
 use App\Models\Book;

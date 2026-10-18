@@ -38,11 +38,11 @@ class IndexBookRequest extends FormRequest
             'genre.exists' => 'ジャンルが存在しません',
 
             'page.integer' => '数値を入力してください',
-            'page.min' => '１以上の数値を入力してください',
+            'page.min' => '1以上の数値を入力してください',
 
             'per_page.integer' => '数値を入力してください',
-            'per_page.min' => '１以上の数値を入力してください',
-            'per_page.max' => '１００以下の数値を入力してください',
+            'per_page.min' => '1以上の数値を入力してください',
+            'per_page.max' => '100以下の数値を入力してください',
         ];
     }
 }

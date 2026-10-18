@@ -7,6 +7,9 @@ use App\Http\Resources\Api\V1\BookResource;
 use App\Http\Requests\Api\V1\IndexBookRequest;
 use App\Http\Requests\Api\V1\StoreUpdateBookRequest;
 use App\Models\Book;
+use App\Models\Genre;
+
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
@@ -48,7 +51,8 @@ class BookController extends Controller
                     return $query->whereHas('genres', fn($query) => $query->where('name', $genre));
                 }
             )
-            ->paginate($per_page);
+            ->paginate($per_page)
+            ->withQueryString();
 
         return BookResource::collection($books);
     }
@@ -61,17 +65,26 @@ class BookController extends Controller
      */
     public function store(StoreUpdateBookRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $book = DB::transaction(function () use ($request) {
+            $validated = $request->validated();
 
-        // ※基本時ユーザーID仮で付与。応用時にsanctum認証ユーザーに変更
-        $validated['user_id'] = 1;
+            // ※基本時ユーザーID仮で付与。応用時にsanctum認証ユーザーに変更
+            $validated['user_id'] = intval($validated['user_id']);
 
-        // firstOrCreateは$validated['genres']のせいで失敗するのでcreateを使用
-        // フォームリクエストでunique属性の重複を弾いているのでcreateで問題ない
-        $book = Book::create($validated);
+            // firstOrCreateは$validated['genres']のせいで失敗するのでcreateを使用
+            // フォームリクエストでunique属性の重複を弾いているのでcreateで問題ない
+            $book = Book::create($validated);
 
-        // 書籍生成しジャンル紐つけ
-        $book->genres()->syncWithoutDetaching($validated['genres']);
+            // ジャンルは名称で返ってくるためid変換してから紐つけ
+            $ids = Genre::whereIn('name', $validated['genres'])
+                ->latest()
+                ->pluck('id');
+            $book->genres()->syncWithoutDetaching($ids);
+
+            return $book;
+        });
+
+        $book->load('genres')->loadCount('reviews');
 
         return (new BookResource($book))
             ->response()
@@ -86,7 +99,7 @@ class BookController extends Controller
      */
     public function show(Book $book): BookResource
     {
-        $book->load('genres', 'reviews');
+        $book->load('genres', 'reviews.user')->loadCount('reviews');
         return new BookResource($book);
     }
 
@@ -99,8 +112,14 @@ class BookController extends Controller
      */
     public function update(StoreUpdateBookRequest $request, Book $book): BookResource
     {
-        $validated = $request->validated();
-        $book->update($validated);
+        DB::transaction(function () use ($request, $book) {
+            $validated = $request->validated();
+            $genreIds = Genre::whereIn('name', $validated['genres'])->pluck('id');
+            unset($validated['genres']);
+            $book->update($validated);
+            $book->genres()->sync($genreIds);
+        });
+        $book->load('genres', 'reviews.user')->loadCount('reviews');
         return new BookResource($book);
     }
 

@@ -17,8 +17,9 @@ class BookFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::find(1) ?? User::factory()->create();
         return [
-            'user_id' => User::findOrFail(1),
+            'user_id' => $user->id,
             'title' => $this->faker->sentence(3),
             'author' => $this->faker->name(),
             'isbn' => $this->faker->isbn13(),

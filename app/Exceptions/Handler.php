@@ -34,7 +34,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof ModelNotFoundException) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'error' => '書籍が見つかりませんでした。',
+                    'error' => '書籍情報が見つかりませんでした。',
                 ], 404);
             }
         }

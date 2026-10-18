@@ -36,8 +36,11 @@ class StoreUpdateBookRequest extends FormRequest
             'published_date' => ['required', 'date_format:Y-m-d'],
             'description' => ['nullable', 'string'],
             'genres' => ['required', 'array'],
-            'genres.*' => ['integer', 'exists:genres,id'],
-            'image_url' => ['nullable', 'url', 'max:2048']
+            'genres.*' => ['string', 'exists:genres,name'],
+            'image_url' => ['nullable', 'url', 'max:2048'],
+
+            // 基本要件時のみ
+            'user_id' => ['integer', 'exists:users,id'],
         ];
     }
 
@@ -60,14 +63,19 @@ class StoreUpdateBookRequest extends FormRequest
             'isbn.unique' => 'このISBNは登録済みです',
 
             'published_date.required' => '出版日を入力してください',
-            'published_date.date_format' => '出版日をYYYY年MM月DD日形式で入力してください',
+            'published_date.date_format' => '出版日をyyyy-mm-dd形式で入力してください',
 
             'genres.required' => 'ジャンルを選択してください',
 
+            'genres.*.string' => 'ジャンルは文字列で入力してください',
             'genres.*.exists' => '登録済みのジャンルを入力して下さい',
 
             'image_url.url' => 'URL形式で入力してください',
             'image_url.max' => 'URLは2048文字以内で入力してください',
+
+            // 基本要件時のみ
+            'user_id.integer' => 'ユーザーIDを数値で入力してください',
+            'user_id.exists' => '登録済みのユーザーを入力してください',
         ];
     }
 }

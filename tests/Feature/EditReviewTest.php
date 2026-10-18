@@ -205,8 +205,6 @@ class EditReviewTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     * 
-     * @return void
      */
     private function createTestDataFromSeeder(): void
     {

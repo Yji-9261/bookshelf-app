@@ -25,7 +25,7 @@ class BookResource extends JsonResource
             'description' => $this->description,
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
             'reviews_avg_rating' => $this->reviews_avg_rating,
-            'review_count' => $this->reviews_count,
+            'reviews_count' => $this->reviews_count,
             'reviews' => $this->getReviews($request)
         ];
     }

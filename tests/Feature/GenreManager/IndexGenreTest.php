@@ -3,19 +3,14 @@
 namespace Tests\Feature\Genre;
 
 use App\Models\User;
-use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class IndexGenreTest extends TestCase
@@ -72,7 +67,7 @@ class IndexGenreTest extends TestCase
             ->assertSeeText('ジャンル管理');
     }
 
-    /** 
+    /**
      * ジャンル名を押すと対象ジャンルの詳細画面に遷移する
      */
     public function testGenreShowLink(): void
@@ -88,7 +83,7 @@ class IndexGenreTest extends TestCase
         $genre = Genre::firstOrFail();
         $showUrl = route('genres.show', $genre);
 
-        // 2 
+        // 2
         $response = $this->actingAs($user)
             ->get(route('genres.index'))
             ->assertOk()
@@ -106,7 +101,7 @@ class IndexGenreTest extends TestCase
         $this->get($links->item(0)->getAttribute('href'))
             ->assertOk()
             ->assertViewIs('genres.show')
-            ->assertViewHas('genre', fn(Genre $shownGenre) => $shownGenre->is($genre))
+            ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre))
             ->assertSeeText($genre->name);
     }
 
@@ -173,7 +168,7 @@ class IndexGenreTest extends TestCase
         $this->get($links->item(0)->getAttribute('href'))
             ->assertOk()
             ->assertViewIs('genres.edit')
-            ->assertViewHas('genre', fn(Genre $shownGenre) => $shownGenre->is($genre));
+            ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre));
     }
 
     /** 書籍に紐づいていないジャンルの「削除」ボタンを押して、ジャンルを削除できる */
@@ -270,7 +265,7 @@ class IndexGenreTest extends TestCase
             ->assertSeeText($message)
             ->assertSeeText($genre->name);
 
-        // 5 
+        // 5
         $this->assertSame($original, $genre->fresh()->getAttributes());
         $this->assertDatabaseCount('genres', $genreCount);
         $this->assertSame($bookIds, $genre->books()->orderBy('books.id')->pluck('books.id')->all());

@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Models\Genre;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
-use function PHPUnit\Framework\assertSame;
 
 class BookTest extends TestCase
 {
@@ -24,12 +22,8 @@ class BookTest extends TestCase
          */
 
         // 1
-        $user = User::create([
-            'name' => 'user1',
-            'email' => 'user1@example.com',
-            'password' => 'password'
-        ]);
-        $book = $user->registeredBooks()->create([
+        $users = User::factory()->count(3)->create();
+        $book = $users[0]->registeredBooks()->create([
             'title' => 'テスト書籍',
             'author' => 'テスト著者',
             'isbn' => '9784000000000',
@@ -37,17 +31,17 @@ class BookTest extends TestCase
         ]);
         $testReviews = [
             [
-                'user_id' => $user->id,
+                'user_id' => $users[0]->id,
                 'rating' => 5,
                 'comment' => '',
             ],
             [
-                'user_id' => $user->id,
+                'user_id' => $users[1]->id,
                 'rating' => 4,
                 'comment' => '',
             ],
             [
-                'user_id' => $user->id,
+                'user_id' => $users[2]->id,
                 'rating' => 3,
                 'comment' => '',
             ],
@@ -61,7 +55,7 @@ class BookTest extends TestCase
 
     /**
      * registerUserのリレーションが適切か
-     * 
+     *
      * @return void
      */
     public function test_registerUser(): void
@@ -235,7 +229,7 @@ class BookTest extends TestCase
          * 3. $book->favoriteUsers()->syncWithoutDetaching($user->id)でリレーション構築
          * 4. テスト:$userと$bookのリレーションが構築できているか
          *    $book->favoriteUsers()->whereKey($user->id)->exists()がtrue
-         *    favoritesテーブル内の'user_id'=>$user->idと'book_id'=>$book->idが存在する 
+         *    favoritesテーブル内の'user_id'=>$user->idと'book_id'=>$book->idが存在する
          * 5. $book->favoriteUsers()->detach($user->id)を使用してリレーション解除
          * 6. テスト:$userと$bookのリレーションが解除されているか
          *    $book->favoriteUsers()->whereKey($user->id)->exists()がfalse

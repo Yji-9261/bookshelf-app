@@ -5,10 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class RankingTest extends TestCase
@@ -68,7 +65,7 @@ class RankingTest extends TestCase
         // レビュー作成時に用いたレビュー評価初期値テーブルを
         // レビュー数と評価平均点の検証用途として加工する
         $averages = collect(self::INITIAL_RATINGS)
-            ->map(fn($ratings) => collect($ratings)->avg());
+            ->map(fn ($ratings) => collect($ratings)->avg());
 
         // top10に入った書籍の登録順インデックスを保持
         $topIndexes = $averages->sortDesc()->take(10)->keys();
@@ -123,11 +120,19 @@ class RankingTest extends TestCase
         // DOMのカード順から平均点を取得して比較（同点同士の順番は指定しない）
         $shownAverages = [];
         foreach ($cards as $card) {
-            $index = $books->search(fn($book) => route('books.show', $book) === $card->getAttribute('href'));
+            $index = $books->search(fn ($book) => route('books.show', $book) === $card->getAttribute('href'));
             $this->assertNotFalse($index);
             $shownAverages[] = $averages[$index];
         }
         $this->assertSame($sortedDescAverages, $shownAverages);
+
+        // 順位表示が、上から1〜10位の連番になっているか確認
+        $rankingIndex = 1;
+        $rankedBooks = $response->viewData('rankedBooks');
+        foreach ($rankedBooks as $index => $rankedBook) {
+            $this->assertSame($index + 1, $rankingIndex);
+            $rankingIndex += 1;
+        }
     }
 
     /** ランキングページが正常に表示される(レビューなし書籍が含まれることがないか) */
@@ -188,7 +193,7 @@ class RankingTest extends TestCase
         $books->each(function ($book, $index) use ($user) {
             foreach (self::INITIAL_RATINGS[$index] as $rating) {
                 $book->reviews()->create([
-                    'user_id' => $user->id,
+                    'user_id' => User::factory()->create()->id,
                     'rating' => $rating,
                     'comment' => 'テスト',
                 ]);
@@ -199,7 +204,7 @@ class RankingTest extends TestCase
     /**
      * 書籍に対するレビュー評価初期値テーブル。検証用にも用いられる。
      */
-    const INITIAL_RATINGS = [
+    public const INITIAL_RATINGS = [
         // 書籍1 レビュー数1 平均レビュー2.0
         [2],
         // 書籍2 レビュー数2 平均レビュー3.0

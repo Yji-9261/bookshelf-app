@@ -5,17 +5,13 @@ namespace Tests\Feature\Genre;
 use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class ShowGenreTest extends TestCase
@@ -63,7 +59,7 @@ class ShowGenreTest extends TestCase
             ->get(route('genres.show', $genre))
             ->assertOk()
             ->assertViewIs('genres.show')
-            ->assertViewHas('genre', fn(Genre $shownGenre) => $shownGenre->is($genre))
+            ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre))
             ->assertSeeText('ジャンル: ' . $genre->name);
         $firstBooks = $firstPage->viewData('books');
         $this->assertCount(10, $firstBooks);
@@ -77,7 +73,7 @@ class ShowGenreTest extends TestCase
         $secondPage = $this->get($secondUrl)
             ->assertOk()
             ->assertViewIs('genres.show')
-            ->assertViewHas('genre', fn(Genre $shownGenre) => $shownGenre->is($genre))
+            ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre))
             ->assertSeeText('ジャンル: ' . $genre->name);
         $secondBooks = $secondPage->viewData('books');
         $this->assertCount(1, $secondBooks);
@@ -100,7 +96,7 @@ class ShowGenreTest extends TestCase
         }
     }
 
-    /** 
+    /**
      * 書籍タイトルを押すと書籍詳細画面に遷移する
      */
     public function testBookShowLink(): void
@@ -137,7 +133,7 @@ class ShowGenreTest extends TestCase
         $this->get($links->item(0)->getAttribute('href'))
             ->assertOk()
             ->assertViewIs('books.show')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book))
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book))
             ->assertSeeText($book->title);
     }
 

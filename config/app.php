@@ -4,7 +4,6 @@ use App\Providers\FortifyServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
-
 return [
 
     /*

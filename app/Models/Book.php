@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Http\Requests\StoreUpdateBookRequest;
 
 class Book extends Model
 {
@@ -64,7 +63,7 @@ class Book extends Model
 
     /**
      * 平均評価点を返す
-     * 
+     *
      * @return Attribute
      */
     public function reviewsAvgRating(): Attribute

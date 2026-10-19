@@ -3,8 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Models\Book;
-use App\Models\Genre;
 use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
@@ -12,19 +10,23 @@ use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class EditReviewTest extends TestCase
 {
     use RefreshDatabase;
 
-    const RATING = 5;
-    const COMMENT = 'テストレビューです';
+    public const RATING = 5;
+    public const COMMENT = 'テストレビューです';
 
+    /**
+     * PUT送信処理
+     * @param Review $review
+     * @param mixed $rating
+     * @param mixed $comment
+     * @return \Illuminate\Testing\TestResponse
+     */
     private function putUpdateReview(
         Review $review,
         $rating = self::RATING,
@@ -37,6 +39,17 @@ class EditReviewTest extends TestCase
             ]);
     }
 
+    /** ゲストとしてレビュー編集画面へアクセスする */
+    public function testCannotGuestEditReview(): void
+    {
+        // 1. レビューを作成する
+        // 2. ゲストとしてGET /reviews/{review}/editにアクセス
+        // 3. テスト: ログイン画面にリダイレクトする
+
+        $review = Review::factory()->create();
+        $this->get("/reviews/{$review->id}/edit")->assertRedirect('/login');
+    }
+
     /** レビュー編集画面が表示される */
     public function testEditView(): void
     {
@@ -44,7 +57,7 @@ class EditReviewTest extends TestCase
         // 2. 対象レビュー投稿者として認証し、レビュー編集画面にアクセス
         // 3. テスト: 既存のrating/commentが初期値として表示された編集フォームが表示される
 
-        // 1 
+        // 1
         $this->createTestDataFromSeeder();
         $review = Review::firstOrFail();
 
@@ -128,8 +141,8 @@ class EditReviewTest extends TestCase
         $response->assertSeeText(str_repeat('★', $rating) . str_repeat('☆', 5 - $rating));
     }
 
-    /** 
-     * 不正項目の入力に対して、バリデーションメッセージが表示される(rating編) 
+    /**
+     * 不正項目の入力に対して、バリデーションメッセージが表示される(rating編)
      * このテストは、ブラウザ操作ではなく、外部からput送信された時に書き換わることがないかのテスト
      */
     public function testRatingValidation(): void

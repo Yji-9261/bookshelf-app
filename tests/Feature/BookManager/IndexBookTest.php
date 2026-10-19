@@ -10,9 +10,7 @@ use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class IndexBookTest extends TestCase
@@ -105,7 +103,7 @@ class IndexBookTest extends TestCase
 
 
 
-    /** 
+    /**
      * ゲスト、認証ユーザー共に書籍タイトルから詳細画面に遷移できる
      */
     public function testBookShowLink(): void
@@ -130,7 +128,7 @@ class IndexBookTest extends TestCase
         $this->get($showUrl)
             ->assertOk()
             ->assertViewIs('books.show')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book));
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book));
 
         // 4,5
         $this->actingAs(User::firstOrFail());
@@ -142,7 +140,7 @@ class IndexBookTest extends TestCase
         $this->get($showUrl)
             ->assertOk()
             ->assertViewIs('books.show')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book));
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book));
     }
 
     /**
@@ -191,7 +189,7 @@ class IndexBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     * 
+     *
      * @return void
      */
     private function createTestDataFromSeeder(): void

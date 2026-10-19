@@ -11,21 +11,18 @@ use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class CreateBookTest extends TestCase
 {
     use RefreshDatabase;
 
-    const TITLE = 'テスト本';
-    const AUTHOR = 'テスト';
-    const ISBN = '9780000000000';
-    const PUBLISHED_DATE = '2026-01-01';
-    const GENRE_NAMES = ['小説'];
+    public const TITLE = 'テスト本';
+    public const AUTHOR = 'テスト';
+    public const ISBN = '9780000000000';
+    public const PUBLISHED_DATE = '2026-01-01';
+    public const GENRE_NAMES = ['小説'];
 
     private function postCreateBook(
         $title = self::TITLE,
@@ -160,7 +157,7 @@ class CreateBookTest extends TestCase
         $this->get(route('books.show', $book))
             ->assertOk()
             ->assertViewIs('books.show')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book))
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book))
             ->assertSeeText($postData['title'])
             ->assertSeeText($postData['author'])
             ->assertSeeText($postData['isbn'])
@@ -287,7 +284,7 @@ class CreateBookTest extends TestCase
         // 2. 認証ユーザーとしてpublished_dateを空にしてpostアクセス
         // 3. テスト: 登録画面に戻り、「出版日を入力してください」が表示され、DB登録されていない
 
-        // 1 
+        // 1
         $this->createTestDataFromSeeder();
         $bookCount = Book::count();
         $createUrl = route('books.create');
@@ -362,7 +359,7 @@ class CreateBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     * 
+     *
      * @return void
      */
     private function createTestDataFromSeeder(): void

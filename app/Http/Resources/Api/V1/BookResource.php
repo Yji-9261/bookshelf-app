@@ -5,7 +5,6 @@ namespace App\Http\Resources\Api\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-
 class BookResource extends JsonResource
 {
     /**
@@ -32,7 +31,7 @@ class BookResource extends JsonResource
 
     /**
      * レビュー表示制御
-     * 
+     *
      * @param Request $request
      * @return mixed|\Illuminate\Http\Resources\MissingValue
      */

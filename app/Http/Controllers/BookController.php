@@ -5,11 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Genre;
 use App\Http\Requests\StoreUpdateBookRequest;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
@@ -24,8 +22,8 @@ class BookController extends Controller
         // title,authorが半角英数字でスペースなく断続した場合
         // 文字列が枠外に飛び出てしまう問題に対応
         // bladeには手をつけず、バックエンド側で対応することをPMと取り決めた
-
-        // 全角や半角でも適切にスペースを盛り込むと改行可能。
+        // 追記: 
+        // スペースを盛り込むと改行可能
         // そのため仕様として対応したい
 
         // $books->through(function ($book) {

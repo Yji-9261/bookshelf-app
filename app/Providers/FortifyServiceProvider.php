@@ -23,7 +23,7 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         //ログアウト後のリダイレクト先を設定
-        $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
+        $this->app->instance(LogoutResponse::class, new class () implements LogoutResponse {
             public function toResponse($request)
             {
                 return redirect('/login');

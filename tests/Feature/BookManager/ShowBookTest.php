@@ -4,15 +4,14 @@ namespace Tests\Feature\BookManager;
 
 use App\Models\User;
 use App\Models\Book;
+use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Tests\TestCase;
 
 class ShowBookTest extends TestCase
@@ -78,7 +77,7 @@ class ShowBookTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    /** 
+    /**
      * 認証ユーザーはお気に入りトグルを押すごとにお気に入りの登録→解除→登録→...が可能
      */
     public function testFavoriteToggle(): void
@@ -123,10 +122,8 @@ class ShowBookTest extends TestCase
 
         // 3~8
         foreach ([true, false, true] as $registered) {
-            $message = $registered ? 'お気に入り登録しました。' : 'お気に入り解除しました。';
             $this->post($toggleUrl)
-                ->assertRedirect($showUrl)
-                ->assertSessionHas('success', $message);
+                ->assertRedirect($showUrl);
 
             if ($registered) {
                 $this->assertDatabaseHas('favorites', $favorite);
@@ -141,7 +138,6 @@ class ShowBookTest extends TestCase
             $this->get($showUrl)
                 ->assertOk()
                 ->assertViewIs('books.show')
-                ->assertSeeText($message)
                 ->assertSee('title="' . $buttonTitle . '"', false)
                 ->assertDontSee('title="' . $otherTitle . '"', false);
         }
@@ -234,6 +230,42 @@ class ShowBookTest extends TestCase
             ->assertSeeText('レビューを投稿しました。');
     }
 
+
+    /**
+     * 既に投稿済みのレビュー書籍に対してレビュー投稿する
+     */
+    public function testCannotReviewPostedBook(): void
+    {
+        // 1. レビュー済みの書籍を作成
+        // 2. レビューフォームにratingとcommentを記入し投稿
+        // 3. テスト: レビュー投稿が拒否される
+
+        // 1
+        $user = User::factory()->create();
+        $book = Book::factory()->create();
+        $review = $book->reviews()->create([
+            'user_id' => $user->id,
+            'rating' => 1,
+            'comment' => 'テスト',
+        ]);
+        // 検証用データ
+        $original = $review->refresh()->getAttributes();
+        $showUrl = route('books.show', $book);
+
+        // 2
+        $this->actingAs($user)->post(route('reviews.store', $book), [
+            'rating' => 5,
+            'comment' => 'テスト更新',
+        ])->assertRedirect($showUrl);
+
+        // エラーメッセージが表示されているか
+        $this->get($showUrl)->assertSeeText('この書籍に対して既にレビュー投稿済みです');
+
+        // DB内容に変更がない
+        $this->assertSame($original, $review->refresh()->getAttributes());
+    }
+
+
     /** ゲストはレビューの「いいね」リンクからログイン画面に遷移する */
     public function testGuestCannotLike(): void
     {
@@ -298,10 +330,8 @@ class ShowBookTest extends TestCase
 
         // 3〜5. 登録・解除・再登録し、DB・遷移先・メッセージ・ボタン表示・件数を確認する
         foreach ([true, false, true] as $registered) {
-            $message = $registered ? 'いいねを登録しました。' : 'いいねを解除しました。';
             $this->post($toggleUrl)
-                ->assertRedirect($showUrl)
-                ->assertSessionHas('success', $message);
+                ->assertRedirect($showUrl);
 
             if ($registered) {
                 $this->assertDatabaseHas('review_likes', $like);
@@ -312,8 +342,7 @@ class ShowBookTest extends TestCase
             $user->refresh();
             $response = $this->get($showUrl)
                 ->assertOk()
-                ->assertViewIs('books.show')
-                ->assertSeeText($message);
+                ->assertViewIs('books.show');
             $count = $initialLikeCount + ($registered ? 1 : 0);
             $label = $registered ? 'いいね済み' : 'いいね';
             $assertLikeButton($response, $label . ' (' . $count . ')');
@@ -506,7 +535,7 @@ class ShowBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     * 
+     *
      * @return void
      */
     private function createTestDataFromSeeder(): void

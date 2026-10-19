@@ -8,9 +8,7 @@ use App\Http\Requests\Api\V1\IndexBookRequest;
 use App\Http\Requests\Api\V1\StoreUpdateBookRequest;
 use App\Models\Book;
 use App\Models\Genre;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
 
@@ -18,7 +16,7 @@ class BookController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * 
+     *
      * @param IndexBookRequest $request
      * @return AnonymousResourceCollection
      */
@@ -48,7 +46,7 @@ class BookController extends Controller
             ->when(
                 $validated['genre'] ?? null,
                 function ($query, $genre) {
-                    return $query->whereHas('genres', fn($query) => $query->where('name', $genre));
+                    return $query->whereHas('genres', fn ($query) => $query->where('name', $genre));
                 }
             )
             ->paginate($per_page)
@@ -59,7 +57,7 @@ class BookController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * 
+     *
      * @param StoreUpdateBookRequest $request
      * @return JsonResponse
      */
@@ -93,7 +91,7 @@ class BookController extends Controller
 
     /**
      * Display the specified resource.
-     * 
+     *
      * @param Book $book
      * @return BookResource
      */
@@ -105,7 +103,7 @@ class BookController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * 
+     *
      * @param StoreUpdateBookRequest $request
      * @param Book $book
      * @return BookResource
@@ -125,7 +123,7 @@ class BookController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * 
+     *
      * @param Book $book
      * @return JsonResponse
      */

@@ -40,13 +40,13 @@ class StoreUpdateBookRequest extends FormRequest
             'image_url' => ['nullable', 'url', 'max:2048'],
 
             // 基本要件時のみ
-            'user_id' => ['integer', 'exists:users,id'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
         ];
     }
 
     /**
      * バリデーションエラー時メッセージ
-     * 
+     *
      * @return array
      */
     public function messages(): array
@@ -74,6 +74,7 @@ class StoreUpdateBookRequest extends FormRequest
             'image_url.max' => 'URLは2048文字以内で入力してください',
 
             // 基本要件時のみ
+            'user_id.required' => 'ユーザーIDを入力してください',
             'user_id.integer' => 'ユーザーIDを数値で入力してください',
             'user_id.exists' => '登録済みのユーザーを入力してください',
         ];

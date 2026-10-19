@@ -11,11 +11,11 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    const NAME = 'user1';
+    public const NAME = 'user1';
 
-    const EMAIL = 'user1@example.com';
+    public const EMAIL = 'user1@example.com';
 
-    const PASSWORD = 'password';
+    public const PASSWORD = 'password';
 
     /**
      * 名前入力のバリデーションエラーメッセージが表示される

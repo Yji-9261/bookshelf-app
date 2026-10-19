@@ -2,7 +2,6 @@
 
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
-use \Illuminate\Database\Eloquent\Collection;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\FavoriteController;

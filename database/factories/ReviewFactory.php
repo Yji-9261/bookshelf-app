@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -42,6 +44,8 @@ class ReviewFactory extends Factory
         ];
 
         return [
+            'book_id' => Book::find(1)?->id ?? Book::factory()->create()->id,
+            'user_id' => User::find(1)?->id ?? User::factory()->create()->id,
             'rating' => $rating,
             'comment' => fake()->randomElement($comments[$rating])
         ];

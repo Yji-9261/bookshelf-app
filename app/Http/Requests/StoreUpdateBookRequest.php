@@ -43,7 +43,7 @@ class StoreUpdateBookRequest extends FormRequest
 
     /**
      * バリデーションエラー時メッセージ
-     * 
+     *
      * @return array
      */
     public function messages(): array

@@ -157,7 +157,7 @@ class UserTest extends TestCase
          * 4. $user->likedReviews()->syncWithoutDetaching($review->id)でリレーション構築
          * 5. テスト:$userと$reviewのリレーションが構築できているか
          *    $user->likedReviews()->whereKey($review->id)->exists()がtrue
-         *    review_likesテーブル内の'user_id'=>$user->idと'review_id'=>$review->idが存在する 
+         *    review_likesテーブル内の'user_id'=>$user->idと'review_id'=>$review->idが存在する
          * 6. $user->likedReviews()->detach($review->id)を使用してリレーション解除
          * 7. テスト:$userと$reviewのリレーションが解除されているか
          *    $user->likedReviews()->whereKey($review->id)->exists()がfalse
@@ -233,7 +233,7 @@ class UserTest extends TestCase
          * 3. $user->favoriteBooks()->syncWithoutDetaching($book->id)でリレーション構築
          * 4. テスト:$userと$bookがリレーションが構築できているか
          *    $user->favoriteBooks()->whereKey($book->id)->exists()がtrue
-         *    favoritesテーブル内の'user_id'=>$user->idと'book_id'=>$book->idが存在する 
+         *    favoritesテーブル内の'user_id'=>$user->idと'book_id'=>$book->idが存在する
          * 5. $user->favoriteBooks()->detach($book->id)を使用してリレーション解除
          * 6. テスト:$userと$bookのリレーションが解除されているか
          *    $user->favoriteBooks()->whereKey($book->id)->exists()がfalse

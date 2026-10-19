@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Models\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 
 class ReviewTest extends TestCase
 {
@@ -109,7 +108,7 @@ class ReviewTest extends TestCase
          * 4. $review->likedByUsers()->syncWithoutDetaching($user->id)でリレーション構築
          * 5. テスト:$userと$reviewのリレーションが構築できているか
          *    $review->likedByUsers()->whereKey($user->id)->exists()がtrue
-         *    review_likesテーブル内の'user_id'=>$user->idと'review_id'=>$review->idが存在する 
+         *    review_likesテーブル内の'user_id'=>$user->idと'review_id'=>$review->idが存在する
          * 6. $review->likedByUsers()->detach($user->id)を使用してリレーション解除
          * 7. テスト:$userと$reviewのリレーションが解除されているか
          *    $review->likedByUsers()->whereKey($user->id)->exists()がfalse

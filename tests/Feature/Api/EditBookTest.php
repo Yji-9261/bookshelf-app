@@ -5,18 +5,8 @@ namespace Tests\Feature\Api;
 use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
-use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
-
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class EditBookTest extends TestCase
@@ -191,9 +181,12 @@ class EditBookTest extends TestCase
     public function testUserIdValidation(): void
     {
         // 1. ユーザーを1人作成した有効なデータを用意する
-        // 2. ユーザーIDを非数値・存在しないIDに変更してPUTする
+        // 2. ユーザーIDを省略・null・空文字・非数値・存在しないIDにしてPUTする
         // 3. HTTP 422とユーザーIDのメッセージを確認し、既存データが変更されないことを確認する
         $this->assertInvalidBookCases('user_id', [
+            [null, 'ユーザーIDを入力してください', 'user_id', true], // キーを省略
+            [null, 'ユーザーIDを入力してください'],
+            ['', 'ユーザーIDを入力してください'],
             ['abc', 'ユーザーIDを数値で入力してください'],
             [999999, '登録済みのユーザーを入力してください'],
         ]);
@@ -236,7 +229,11 @@ class EditBookTest extends TestCase
         foreach ($cases as $case) {
             [$value, $message] = $case;
             $errorKey = $case[2] ?? $field;
-            $response = $this->putJson('/api/v1/books/' . $book->id, array_replace($data, [$field => $value]))
+            $requestData = array_replace($data, [$field => $value]);
+            if ($case[3] ?? false) {
+                unset($requestData[$field]);
+            }
+            $response = $this->putJson('/api/v1/books/' . $book->id, $requestData)
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors([$errorKey]);
 

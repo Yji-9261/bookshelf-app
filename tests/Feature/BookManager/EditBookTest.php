@@ -11,21 +11,18 @@ use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class EditBookTest extends TestCase
 {
     use RefreshDatabase;
 
-    const TITLE = 'テスト本';
-    const AUTHOR = 'テスト';
-    const ISBN = '9780000000000';
-    const PUBLISHED_DATE = '2026-01-01';
-    const GENRE_NAMES = ['小説'];
+    public const TITLE = 'テスト本';
+    public const AUTHOR = 'テスト';
+    public const ISBN = '9780000000000';
+    public const PUBLISHED_DATE = '2026-01-01';
+    public const GENRE_NAMES = ['小説'];
 
     private function putUpdateBook(
         Book $book,
@@ -54,6 +51,19 @@ class EditBookTest extends TestCase
                 'description' => $description,
             ]);
     }
+
+    /** ゲストとして書籍編集画面へアクセスする */
+    public function testCannotGuestEditBook(): void
+    {
+        // 1. 書籍を作成する
+        // 2. ゲストとしてGET /books/{book}/editにアクセス
+        // 3. テスト: ログイン画面にリダイレクトする
+
+        $book = Book::factory()->create();
+        $book->genres()->sync(Genre::create(['name' => 'テスト'])->id);
+        $this->get("/books/{$book->id}/edit")->assertRedirect('/login');
+    }
+
 
     /** 書籍編集画面が表示される */
     public function testEditView(): void
@@ -407,7 +417,7 @@ class EditBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     * 
+     *
      * @return void
      */
     private function createTestDataFromSeeder(): void

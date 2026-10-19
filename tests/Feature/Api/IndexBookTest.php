@@ -2,18 +2,14 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -255,7 +251,7 @@ class IndexBookTest extends TestCase
             $response->assertJsonPath("data.{$index}.{$field}", $book->$field);
         }
         $this->assertEqualsCanonicalizing(
-            $book->genres->map(fn($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
+            $book->genres->map(fn ($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
             $response->json("data.{$index}.genres")
         );
         $this->assertEqualsWithDelta($book->reviews_avg_rating, $response->json("data.{$index}.reviews_avg_rating"), 0.00001);

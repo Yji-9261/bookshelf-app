@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Resources\Api\V1\IndexBookResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\BookController;
@@ -21,7 +20,7 @@ use App\Http\Controllers\Api\V1\BookController;
 // });
 
 Route::prefix('v1')->group(function () {
-    // レスポンスにて出力を制限するためにルート名称を定義する 
+    // レスポンスにて出力を制限するためにルート名称を定義する
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
 
     Route::get('/books/{book}', [BookController::class, 'show']);
@@ -29,4 +28,3 @@ Route::prefix('v1')->group(function () {
     Route::put('/books/{book}', [BookController::class, 'update']);
     Route::delete('/books/{book}', [BookController::class, 'destroy']);
 });
-

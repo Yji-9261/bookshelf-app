@@ -5,17 +5,7 @@ namespace Tests\Feature\Api;
 use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
-use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
-
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class ShowBookTest extends TestCase
@@ -67,10 +57,10 @@ class ShowBookTest extends TestCase
                     'published_date' => $book->published_date,
                     'image_url' => $book->image_url,
                     'description' => $book->description,
-                    'genres' => $genres->map(fn($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
+                    'genres' => $genres->map(fn ($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
                     'reviews_avg_rating' => $reviewRatings->avg(),
                     'reviews_count' => $reviewRatings->count(),
-                    'reviews' => $reviews->map(fn($review) => [
+                    'reviews' => $reviews->map(fn ($review) => [
                         'id' => $review->id,
                         'user_name' => $review->user->name,
                         'rating' => $review->rating,

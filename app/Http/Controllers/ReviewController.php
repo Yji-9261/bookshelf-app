@@ -9,26 +9,16 @@ use App\Http\Requests\StoreUpdateReviewRequest;
 class ReviewController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreUpdateReviewRequest $request, Book $book)
     {
+        // 書籍に対してレビューが既に投稿済みならエラーメッセージ表示
+        if ($book->reviews()->where('user_id', $request->user()->id)->exists()) {
+            return redirect(route('books.show', ['book' => $book]))
+                ->with('error', 'この書籍に対して既にレビュー投稿済みです。');
+        }
+
         $validated = $request->validated();
 
         // 紐つける書籍IDを付与してレビュー作成
@@ -37,14 +27,6 @@ class ReviewController extends Controller
 
         return redirect(route('books.show', ['book' => $book]))
             ->with('success', 'レビューを投稿しました。');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Review $review)
-    {
-        //
     }
 
     /**

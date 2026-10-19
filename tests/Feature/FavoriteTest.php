@@ -4,18 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Book;
-use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
-use Laravel\Sail\Console\PublishCommand;
 use Tests\TestCase;
 
 class FavoriteTest extends TestCase
@@ -72,7 +67,7 @@ class FavoriteTest extends TestCase
             ->assertSeeText('お気に入り一覧');
     }
 
-    /** 
+    /**
      * お気に入り一覧画面でお気に入り登録した書籍一覧がページネーションされ表示されている
      */
     public function testFavoritesPagination(): void
@@ -169,13 +164,13 @@ class FavoriteTest extends TestCase
         $this->get($links->item(0)->getAttribute('href'))
             ->assertOk()
             ->assertViewIs('books.show')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book))
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book))
             ->assertSeeText($book->title);
     }
 
     /**
      * seederからテストデータ生成
-     * 
+     *
      * @return void
      */
     private function createTestDataFromSeeder(): void

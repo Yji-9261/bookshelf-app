@@ -3,16 +3,13 @@
 namespace Tests\Feature\Genre;
 
 use App\Models\User;
-use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +17,7 @@ class CreateGenreTest extends TestCase
 {
     use RefreshDatabase;
 
-    const NAME = 'テスト';
+    public const NAME = 'テスト';
 
     private function postCreateGenre($name = self::NAME)
     {
@@ -79,7 +76,7 @@ class CreateGenreTest extends TestCase
         $this->assertCount(1, $xpath->query('.//button[@type="submit"]', $form));
     }
 
-    /** 
+    /**
      * 正常な入力をして「登録」ボタンを押下する
      */
     public function testCreateGenre(): void

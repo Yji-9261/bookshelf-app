@@ -3,16 +3,13 @@
 namespace Tests\Feature\Genre;
 
 use App\Models\User;
-use App\Models\Book;
 use App\Models\Genre;
-use App\Models\Review;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
 use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +17,7 @@ class EditGenreTest extends TestCase
 {
     use RefreshDatabase;
 
-    const NAME = 'テスト';
+    public const NAME = 'テスト';
 
     private function putUpdateGenre(
         Genre $genre,
@@ -65,7 +62,7 @@ class EditGenreTest extends TestCase
             ->get(route('genres.edit', $genre))
             ->assertOk()
             ->assertViewIs('genres.edit')
-            ->assertViewHas('genre', fn(Genre $shownGenre) => $shownGenre->is($genre));
+            ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre));
 
         // 3
         $document = new \DOMDocument();
@@ -81,7 +78,7 @@ class EditGenreTest extends TestCase
         $this->assertSame($genre->name, $inputs->item(0)->getAttribute('value'));
     }
 
-    /** 
+    /**
      * 正常な入力をして「更新」ボタンを押下する
      */
     public function testUpdateGenre(): void

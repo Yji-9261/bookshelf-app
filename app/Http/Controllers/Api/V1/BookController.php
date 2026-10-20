@@ -8,10 +8,12 @@ use App\Http\Requests\Api\V1\IndexBookRequest;
 use App\Http\Requests\Api\V1\StoreUpdateBookRequest;
 use App\Models\Book;
 use App\Models\Genre;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
 use Laravel\Sanctum\Sanctum;
+use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
@@ -67,12 +69,9 @@ class BookController extends Controller
         $book = DB::transaction(function () use ($request) {
             $validated = $request->validated();
 
-            // ※基本時ユーザーID仮で付与。応用時にsanctum認証ユーザーに変更
-            $validated['user_id'] = intval($validated['user_id']);
-
             // firstOrCreateは$validated['genres']のせいで失敗するのでcreateを使用
             // フォームリクエストでunique属性の重複を弾いているのでcreateで問題ない
-            $book = Book::create($validated);
+            $book = $request->user()->registeredBooks()->create($validated);
 
             // ジャンルは名称で返ってくるためid変換してから紐つけ
             $ids = Genre::whereIn('name', $validated['genres'])
@@ -84,7 +83,6 @@ class BookController extends Controller
         });
 
         $book->load('genres')->loadCount('reviews');
-
         return (new BookResource($book))
             ->response()
             ->setStatusCode(201);
@@ -112,8 +110,14 @@ class BookController extends Controller
     public function update(StoreUpdateBookRequest $request, Book $book): BookResource
     {
         DB::transaction(function () use ($request, $book) {
+            $this->authorize('update', $book);
+
             $validated = $request->validated();
+
+            // ジャンル名称指定で入ってくるgenresをIDに変換
             $genreIds = Genre::whereIn('name', $validated['genres'])->pluck('id');
+
+            // 余計なgenresキーを削除
             unset($validated['genres']);
             $book->update($validated);
             $book->genres()->sync($genreIds);
@@ -130,6 +134,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book): JsonResponse
     {
+        $this->authorize('delete', $book);
         $book->delete();
         return response()->json(null, 204);
     }

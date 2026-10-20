@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuthenticationController;
 use App\Http\Controllers\Api\V1\BookController;
 
 /*
@@ -20,11 +21,17 @@ use App\Http\Controllers\Api\V1\BookController;
 // });
 
 Route::prefix('v1')->group(function () {
+    Route::post('/login', [AuthenticationController::class, 'login']);
+
     // レスポンスにて出力を制限するためにルート名称を定義する
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
 
     Route::get('/books/{book}', [BookController::class, 'show']);
-    Route::post('/books', [BookController::class, 'store']);
-    Route::put('/books/{book}', [BookController::class, 'update']);
-    Route::delete('/books/{book}', [BookController::class, 'destroy']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthenticationController::class, 'logout']);
+        Route::post('/books', [BookController::class, 'store']);
+        Route::put('/books/{book}', [BookController::class, 'update']);
+        Route::delete('/books/{book}', [BookController::class, 'destroy']);
+    });
 });

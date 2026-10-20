@@ -11,6 +11,7 @@ use App\Models\Genre;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
+use Laravel\Sanctum\Sanctum;
 
 class BookController extends Controller
 {
@@ -46,7 +47,7 @@ class BookController extends Controller
             ->when(
                 $validated['genre'] ?? null,
                 function ($query, $genre) {
-                    return $query->whereHas('genres', fn ($query) => $query->where('name', $genre));
+                    return $query->whereHas('genres', fn($query) => $query->where('name', $genre));
                 }
             )
             ->paginate($per_page)

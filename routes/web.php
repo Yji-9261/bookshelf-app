@@ -24,9 +24,8 @@ use App\Http\Controllers\ReviewLikeController;
 Route::get('/', [BookController::class, 'index'])
     ->name('books.index');
 
-Route::get('/books', function () {
-    return redirect('/');
-})->name('books.index');
+Route::get('/books', [BookController::class, 'index'])
+    ->name('books.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/books/create', [BookController::class, 'create'])
@@ -106,4 +105,29 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/genres/{genre}', [GenreController::class, 'destroy'])
         ->name('genres.destroy');
+});
+
+
+/** レポート */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reports', function () { }/*[GenreController::class, 'index']*/)
+        ->name('reports.index');
+});
+
+/** 読書計画 */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reading-plans', function () { }/*[GenreController::class, 'index']*/)
+        ->name('reading-plans.index');
+});
+
+
+/** 通知 */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications', function () { }/*[GenreController::class, 'index']*/)
+        ->name('notifications.index');
+});
+
+/** isbn検索 */
+Route::middleware(['auth'])->group(function () {
+    Route::get('/books/isbn/{isbn}', [BookController::class, 'getBookInformation']);
 });

@@ -40,8 +40,11 @@ class BookController extends Controller
             ->when(
                 $validated['keyword'] ?? null,
                 function ($query, $keyword) {
-                    return $query->where('title', 'LIKE', "%{$keyword}%")
-                        ->orWhere('author', 'LIKE', "%{$keyword}%");
+                    // whereで囲んでorWhere以降の検索優先順位を保護
+                    $query->where(function ($query) use ($keyword) {
+                        return $query->where('title', 'LIKE', "%{$keyword}%")
+                            ->orWhere('author', 'LIKE', "%{$keyword}%");
+                    });
                 }
             )
 
@@ -52,8 +55,7 @@ class BookController extends Controller
                     return $query->whereHas('genres', fn($query) => $query->where('name', $genre));
                 }
             )
-            ->paginate($per_page)
-            ->withQueryString();
+            ->paginate($per_page);
 
         return BookResource::collection($books);
     }

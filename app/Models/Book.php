@@ -23,6 +23,10 @@ class Book extends Model
         'image_url',
     ];
 
+    protected $casts = [
+        'published_date' => 'datetime',
+    ];
+
     /**
      * 登録したユーザー
      * @return BelongsTo
@@ -61,17 +65,17 @@ class Book extends Model
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
 
-    /**
-     * 平均評価点を返す
-     *
-     * @return Attribute
-     */
-    public function reviewsAvgRating(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                return (float) $this->reviews()->avg('rating');
-            }
-        );
-    }
+    // /**
+    //  * 平均評価点を返す
+    //  *
+    //  * @return Attribute
+    //  */
+    // public function reviewsAvgRating(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: function () {
+    //             return (float) $this->reviews()->avg('rating');
+    //         }
+    //     );
+    // }
 }

@@ -2,22 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Sort;
 use App\Models\Book;
 use App\Models\Genre;
+use Illuminate\Http\Request;
+use App\Http\Requests\IndexBookRequest;
 use App\Http\Requests\StoreUpdateBookRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+
+use Illuminate\Support\Facades\Log;
+
 
 class BookController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(IndexBookRequest $request): View
     {
-        // 平均評価点算出のため書籍に紐ついたレビューをEager loading
-        $books = Book::with('reviews')->paginate(10);
+        $validated = $request->validated();
+
+        // reviews_avg_rating(評価平均点)付与
+        $books = Book::query()->withAvg('reviews', 'rating')
+            // keyword検索
+            ->when(
+                $validated['keyword'] ?? null,
+                function ($query, $keyword) {
+                    // whereで囲んでorWhere以降の検索優先順位を保護
+                    $query->where(function ($query) use ($keyword) {
+                        $query->where('title', 'LIKE', "%{$keyword}%")
+                            ->orWhere('author', 'LIKE', "%{$keyword}%");
+                    });
+                }
+            )
+
+            // genre検索
+            ->when(
+                $validated['genre'] ?? null,
+                function ($query, $genreId) {
+                    return $query->whereHas('genres', fn($query) => $query->where('genres.id', $genreId));
+                }
+            )
+
+            // 並び替え
+            ->when(
+                $validated['sort'] ?? null,
+                function ($query, $sort) {
+                    return match ($sort) {
+                        'newest' => $query->orderBy('created_at', 'desc'),
+                        'oldest' => $query->orderBy('created_at', 'asc'),
+                        'rating' => $query->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc'),
+                        'title' => $query->orderBy('title', 'asc'),
+                    };
+                }
+            )
+            ->paginate(10)
+            ->withQueryString();
 
         // title,authorが半角英数字でスペースなく断続した場合
         // 文字列が枠外に飛び出てしまう問題に対応
@@ -33,7 +76,8 @@ class BookController extends Controller
         // });
 
         return View('books.index', [
-            'books' => $books
+            'books' => $books,
+            'genres' => Genre::all(),
         ]);
     }
 
@@ -125,5 +169,32 @@ class BookController extends Controller
 
         // 書籍一覧画面にリダイレクト
         return redirect(route('books.index'))->with('success', '書籍を削除しました。');
+    }
+
+    public function getBookInformation(string $isbn)
+    {
+        // 2026/10/21 GoogleBooksApiのisbnを指定した検索に不具合が生じている模様
+        // https://issuetracker.google.com/issues/569300353
+        // 実際にisbn検索しても0件しか取れないため現状検証不可
+        // 代わりにLaravelキーワード検索の結果を取得し、テストする
+
+        $apiKey = env('GOOGLE_BOOK_API_KEY');
+        $request = Http::get('https://www.googleapis.com/books/v1/volumes', [
+            //'q' => "isbn:{$isbn}",
+            'q' => "Laravel",
+            'maxResults' => 1,
+            'key' => $apiKey,
+        ]);
+
+        // isbn検索のためデータ数は１件で確定しているためitemsの0を指定して配列を取得
+        // 配列をコレクションに変換してさらに必要な形式に変換する
+        $volumeInfo = collect($request->json('items.0.volumeInfo'));
+        return [
+            'title' => $volumeInfo['title'],
+            'author' => implode('・', $volumeInfo['authors']),
+            'description' => $volumeInfo['description'],
+            'image_url' => $volumeInfo['imageLinks']['thumbnail'],
+            'published_date' => $volumeInfo['publishedDate'],
+        ];
     }
 }

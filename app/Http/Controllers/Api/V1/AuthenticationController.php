@@ -4,29 +4,28 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Http\Requests\Api\V1\LoginRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
 
 class AuthenticationController extends Controller
 {
     /**
-     * ログイン
+     * トークン認証方式ログイン
      * @param Request $request
      * @return JsonResponse
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        // 未入力の時はnullが入るためemail(required),password(required)の認証で失敗する
-        $credentials = [
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ];
+        $validated = $request->validated();
 
-        if (Auth::attempt($credentials)) {
+        // emailとパスワードを比較して一致しているならトークンを返す
+        $user = User::where('email', $validated['email'])->first();
+        if ($user && Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 'message' => '認証に成功しました',
-                'token' => $request->user()->createToken('api-token')->plainTextToken,
+                'token' => $user->createToken('api-token')->plainTextToken,
             ], 200);
         }
 
@@ -37,7 +36,7 @@ class AuthenticationController extends Controller
 
 
     /**
-     * ログアウト
+     * トークン認証方式ログアウト
      * @param Request $request
      * @return JsonResponse
      */

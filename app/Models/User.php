@@ -84,4 +84,5 @@ class User extends Authenticatable
         // 外部キーはuser_idとbook_idで規約通りのため省略
         return $this->belongsToMany(Book::class, 'favorites')->withTimestamps();
     }
+
 }

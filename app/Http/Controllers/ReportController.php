@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\ReadingPlan;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,7 +21,7 @@ class ReportController extends Controller
 
         return view('reports.index', [
             'stats' => [
-                'summary' => $this->getSummary($reviews),
+                'summary' => $this->getSummary($request, $reviews),
                 'rating_distribution' => $this->getRatingDistribution($reviews),
                 'top_rated_books' => $this->getTopRatedBooks($reviews),
                 'genre_ratings' => $this->getGenreRating($request),
@@ -34,11 +35,18 @@ class ReportController extends Controller
      * @param Collection $reviews
      * @return array
      */
-    private function getSummary(Collection $reviews)
+    private function getSummary(Request $request, Collection $reviews)
     {
         return [
+            // 総レビュー数
             'total_reviews' => $reviews->count(),
-            'books_read' => 0,
+
+            // 読了冊数
+            'books_read' => $request->user()->readingPlans()
+                ->whereNotNull('completed_at')
+                ->count(),
+
+            // 平均評価
             'average_rating' => $reviews->avg('rating'),
         ];
     }
@@ -92,7 +100,6 @@ class ReportController extends Controller
     {
         // calcReviewAverageForUser内部でbooksアクセスするのでEagerLoading
         return Genre::with('books.reviews')
-            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($genre) use ($request) {
                 return collect(

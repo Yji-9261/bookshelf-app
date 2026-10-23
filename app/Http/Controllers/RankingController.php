@@ -27,11 +27,11 @@ class RankingController extends Controller
     {
         // レビューが存在が存在する、平均評価top10を降順で取得する
         return
-            Book::with('reviews')
+            Book::withAvg('reviews', 'rating')
                 ->withCount('reviews')
                 ->has('reviews')
                 ->get()
-                ->sortByDesc(fn ($book) => $book->reviews_avg_rating)
+                ->sortByDesc(fn($book) => $book->reviews_avg_rating)
                 ->take(10)
                 ->values();
     }

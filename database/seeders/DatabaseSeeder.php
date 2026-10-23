@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ReviewSeeder::class,
             FavoriteSeeder::class,
             ReviewLikeSeeder::class,
+            ReadingPlanSeeder::class,
         ]);
 
         // \App\Models\User::factory(10)->create();

@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\ReadingPlanController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReviewLikeController;
@@ -117,15 +119,40 @@ Route::middleware(['auth'])->group(function () {
 
 /** 読書計画 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/reading-plans', function () { }/*[GenreController::class, 'index']*/)
+    Route::get('/reading-plans', [ReadingPlanController::class, 'index'])
         ->name('reading-plans.index');
+
+    Route::get('/reading-plans/create', [ReadingPlanController::class, 'create'])
+        ->name('reading-plans.create');
+
+    Route::post('/reading-plans/create', [ReadingPlanController::class, 'store'])
+        ->name('reading-plans.store');
+
+    // 読了にする
+    Route::post('/reading-plans/{plan}/complete', [ReadingPlanController::class, 'complete'])
+        ->name('reading-plans.complete');
+
+    // 編集画面表示
+    Route::get('/reading-plans/{plan}/edit', [ReadingPlanController::class, 'edit'])
+        ->name('reading-plans.edit');
+
+    // 編集
+    Route::put('/reading-plans/{plan}', [ReadingPlanController::class, 'update'])
+        ->name('reading-plans.update');
+
+    // 削除
+    Route::delete('/reading-plans/{plan}', [ReadingPlanController::class, 'destroy'])
+        ->name('reading-plans.destroy');
 });
 
 
 /** 通知 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/notifications', function () { }/*[GenreController::class, 'index']*/)
+    Route::get('/notifications', [NotificationController::class, 'index'])
         ->name('notifications.index');
+
+    Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'update'])
+        ->name('notifications.read');
 });
 
 /** isbn検索 */

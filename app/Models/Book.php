@@ -65,6 +65,16 @@ class Book extends Model
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
 
+    /**
+     * 読書計画
+     * @return HasMany
+     */
+    public function readingPlans(): HasMany
+    {
+        return $this->hasMany(ReadingPlan::class);
+    }
+
+
     // /**
     //  * 平均評価点を返す
     //  *

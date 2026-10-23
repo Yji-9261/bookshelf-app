@@ -31,10 +31,9 @@ class BookController extends Controller
         $per_page = $validated['per_page'] ?? 20;
 
         $books = Book::query()
-            // reviewsのeager loadingはレビュー評価平均点算出のため使用される
-            ->with(['genres', 'reviews'])
-            // レビュー評価平均点以外にレビュー数も取得したいのでwithCountする
-            ->withCount(['reviews'])
+            ->with('genres')
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
 
             // キーワード検索（タイトル・著者名への部分一致）
             ->when(
@@ -84,7 +83,10 @@ class BookController extends Controller
             return $book;
         });
 
-        $book->load('genres')->loadCount('reviews');
+        $book->load('genres')
+            ->loadCount('reviews')
+            ->loadAvg('reviews', 'rating');
+
         return (new BookResource($book))
             ->response()
             ->setStatusCode(201);
@@ -98,7 +100,9 @@ class BookController extends Controller
      */
     public function show(Book $book): BookResource
     {
-        $book->load('genres', 'reviews.user')->loadCount('reviews');
+        $book->load('genres', 'reviews.user')
+            ->loadCount('reviews')
+            ->loadAvg('reviews', 'rating');
         return new BookResource($book);
     }
 
@@ -124,7 +128,10 @@ class BookController extends Controller
             $book->update($validated);
             $book->genres()->sync($genreIds);
         });
-        $book->load('genres', 'reviews.user')->loadCount('reviews');
+        $book->load('genres', 'reviews.user')
+            ->loadCount('reviews')
+            ->loadAvg('reviews', 'rating');
+
         return new BookResource($book);
     }
 

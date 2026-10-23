@@ -171,6 +171,11 @@ class BookController extends Controller
         return redirect(route('books.index'))->with('success', '書籍を削除しました。');
     }
 
+    /**
+     * 指定のISBNにてGooglBooksAPIにアクセスし、対象書籍の情報をjsに返す処理
+     * @param string $isbn
+     * @return array
+     */
     public function getBookInformation(string $isbn)
     {
         // 2026/10/21 GoogleBooksApiのisbnを指定した検索に不具合が生じている模様
@@ -187,8 +192,7 @@ class BookController extends Controller
         ]);
 
         // isbn検索のためデータ数は１件で確定しているためitemsの0を指定して配列を取得
-        // 配列をコレクションに変換してさらに必要な形式に変換する
-        $volumeInfo = collect($request->json('items.0.volumeInfo'));
+        $volumeInfo = $request->json('items.0.volumeInfo');
         return [
             'title' => $volumeInfo['title'],
             'author' => implode('・', $volumeInfo['authors']),

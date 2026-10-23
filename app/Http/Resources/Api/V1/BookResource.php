@@ -23,7 +23,10 @@ class BookResource extends JsonResource
             'image_url' => $this->image_url,
             'description' => $this->description,
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
-            'reviews_avg_rating' => $this->reviews_avg_rating,
+
+            // nullでもいいが 0 にしておいたほうが安全のため0にする
+            'reviews_avg_rating' => $this->reviews_avg_rating ?? 0,
+
             'reviews_count' => $this->reviews_count,
             'reviews' => $this->getReviews($request)
         ];

@@ -12,6 +12,8 @@ reviews ||--o{ review_likes : ""
 books ||--o{ reviews : ""
 books ||--o{ book_genre : ""
 genres ||--o{ book_genre : ""
+users ||--o{ reading_plans : ""
+books ||--o{ reading_plans : ""
 
 users{
     bigint id PK
@@ -74,6 +76,27 @@ favorites{
     bigint id PK
     bigint book_id FK
     bigint user_id FK
+    datetime created_at
+    datetime updated_at
+}
+
+reading_plans{
+    bigint id PK
+    bigint user_id FK
+    bigint book_id FK
+    date target_date
+    varchar(10) status
+    datetime created_at
+    datetime updated_at
+}
+
+notifications{
+    uuid id PK
+    varchar(255) type
+    varchar(255) notifiable_type
+    bigint notifiable_id
+    text data
+    datetime read_at
     datetime created_at
     datetime updated_at
 }

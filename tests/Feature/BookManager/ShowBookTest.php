@@ -34,9 +34,11 @@ class ShowBookTest extends TestCase
             ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book));
 
         // 3. Seederで作成した書籍情報・画像が表示される
-        foreach (['title', 'author', 'isbn', 'published_date', 'description'] as $field) {
-            $response->assertSeeText($book->$field);
-        }
+        $response->assertSeeText($book->title);
+        $response->assertSeeText($book->author);
+        $response->assertSeeText($book->isbn);
+        $response->assertSeeText($book->description);
+        $response->assertSeeText($book->published_date->toDateString());
         $response->assertSee('src="' . $book->image_url . '"', false);
 
         // 4. 対象書籍のジャンルが表示される

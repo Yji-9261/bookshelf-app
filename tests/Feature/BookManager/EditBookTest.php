@@ -307,12 +307,12 @@ class EditBookTest extends TestCase
         }
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(published_date編) */
-    public function testPublishedDateValidation(): void
+    /** published_dateのnull許容テスト(応用時変更箇所) */
+    public function testPublishedDateNoValidation(): void
     {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、published_dateを空にしてPUT送信
-        // 3. テスト: 編集画面に戻り、「出版日を入力してください」が表示され、DBの内容が更新されていない
+        // 3. テスト: 編集成功する
 
         // 1
         $this->createTestDataFromSeeder();
@@ -322,20 +322,25 @@ class EditBookTest extends TestCase
         $original = $book->getAttributes();
         $originalGenreIds = $book->genres()->orderBy('genres.id')->pluck('genres.id')->all();
         $bookCount = Book::count();
-        $editUrl = route('books.edit', $book);
+        //$editUrl = route('books.edit', $book);
+        $showUrl = route('books.show', $book);
 
         // 2,3
-        $this->from($editUrl)->putUpdateBook(book: $book, publishDate: '')
-            ->assertRedirect($editUrl)
-            ->assertSessionHasErrors(['published_date' => '出版日を入力してください'])
-            ->assertSessionDoesntHaveErrors(['title', 'author', 'isbn', 'genres', 'image_url', 'description']);
+        $this->from($showUrl)->putUpdateBook(book: $book, publishDate: '')
+            ->assertSessionDoesntHaveErrors([
+                'title',
+                'author',
+                'isbn',
+                'genres',
+                'image_url',
+                'description',
+                'published_date'
+            ]);
 
-        $this->get($editUrl)
-            ->assertOk()
-            ->assertViewIs('books.edit')
-            ->assertSeeText('出版日を入力してください');
+        $this->get($showUrl)
+            ->assertOk();
 
-        $this->assertSame($original, $book->fresh()->getAttributes());
+        //$this->assertSame($original, $book->fresh()->getAttributes());
         $this->assertSame($originalGenreIds, $book->genres()->orderBy('genres.id')->pluck('genres.id')->all());
         $this->assertDatabaseCount('books', $bookCount);
     }

@@ -33,7 +33,7 @@ class StoreUpdateBookRequest extends FormRequest
                 // 新規登録時のroute('book')はnullのためignore部分は処理されない
                 Rule::unique('books', 'isbn')->ignore($this->route('book'))
             ],
-            'published_date' => ['required', 'date_format:Y-m-d'],
+            'published_date' => ['nullable', 'date_format:Y-m-d'],
             'description' => ['nullable', 'string'],
             'genres' => ['required', 'array'],
             'genres.*' => ['integer', 'exists:genres,id'],

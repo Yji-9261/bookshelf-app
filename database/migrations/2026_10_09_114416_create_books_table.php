@@ -18,7 +18,7 @@ return new class () extends Migration {
             $table->string('isbn', 13)->unique();
             $table->string('image_url', 2048)->nullable();
             $table->text('description')->nullable();
-            $table->date('published_date');
+            $table->date('published_date')->nullable();
             $table->timestamps();
         });
     }

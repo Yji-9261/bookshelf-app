@@ -13,8 +13,7 @@ class ReviewTest extends TestCase
     /**
      * userのリレーションが適切か
      */
-    public function test_user(): void
-    {
+    public function test_user(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -49,8 +48,7 @@ class ReviewTest extends TestCase
     /**
      * bookのリレーションが適切か
      */
-    public function test_book(): void
-    {
+    public function test_book(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -99,8 +97,7 @@ class ReviewTest extends TestCase
     /**
      * likedByUsersのリレーションが適切か
      */
-    public function test_likedByUsers(): void
-    {
+    public function test_likedByUsers(): void {
         /**
          * 1. 投稿者$authorと、いいねする$userをUser::create([...])で作成
          * 2. $book = $author->registeredBooks()->create([...])で書籍生成

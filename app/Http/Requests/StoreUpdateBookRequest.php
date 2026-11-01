@@ -10,8 +10,7 @@ class StoreUpdateBookRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -20,8 +19,7 @@ class StoreUpdateBookRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'title' => ['required', 'string', 'max:255'],
             'author' => ['required', 'string', 'max:255'],
@@ -46,8 +44,7 @@ class StoreUpdateBookRequest extends FormRequest
      *
      * @return array
      */
-    public function messages(): array
-    {
+    public function messages(): array {
         return [
             'title.required' => '書籍のタイトルを入力してください',
             'title.max' => '書籍のタイトルを255文字以内で入力してください',

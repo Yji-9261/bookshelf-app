@@ -14,8 +14,7 @@ class GenreTest extends TestCase
     /**
      * booksのリレーションが適切か
      */
-    public function test_books(): void
-    {
+    public function test_books(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成

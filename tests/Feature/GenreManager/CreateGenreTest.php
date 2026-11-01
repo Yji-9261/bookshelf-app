@@ -19,8 +19,7 @@ class CreateGenreTest extends TestCase
 
     public const NAME = 'テスト';
 
-    private function postCreateGenre($name = self::NAME)
-    {
+    private function postCreateGenre($name = self::NAME) {
         return $this->actingAs(User::findOrFail(1))
             ->post(route('genres.store'), [
                 'name' => $name,
@@ -29,8 +28,7 @@ class CreateGenreTest extends TestCase
 
 
     /** ゲストがジャンル登録リンクを押下するとログイン画面にリダイレクトする */
-    public function testGuestCannotCreateGenre(): void
-    {
+    public function testGuestCannotCreateGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル登録画面にアクセス
         // 3. テスト: ログイン画面にリダイレクトする
@@ -46,8 +44,7 @@ class CreateGenreTest extends TestCase
     }
 
     /** 認証ユーザーはページが正常に表示される */
-    public function testCreateView(): void
-    {
+    public function testCreateView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとしてジャンル登録画面にアクセス
         // 3. テスト: ジャンル名入力フォームが表示される
@@ -79,8 +76,7 @@ class CreateGenreTest extends TestCase
     /**
      * 正常な入力をして「登録」ボタンを押下する
      */
-    public function testCreateGenre(): void
-    {
+    public function testCreateGenre(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてnameを指定しPost送信
         // 3. テスト: ジャンル一覧にリダイレクトされ、内容が反映されている
@@ -108,8 +104,7 @@ class CreateGenreTest extends TestCase
     }
 
     /** 不正な入力をして「登録」ボタンを押下する */
-    public function testNameValidation(): void
-    {
+    public function testNameValidation(): void {
         // 1. seederからテストデータ作成
         // 2. postCreateGenre(name:'')を実行
         // 3. テスト: ジャンル登録画面にリダイレクトされ「ジャンルを入力してください」メッセージが表示される
@@ -147,8 +142,7 @@ class CreateGenreTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,

@@ -10,8 +10,7 @@ class FavoriteController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         return View('favorites.index', [
             'books' => $request->user()->favoriteBooks()->paginate(10)
         ]);
@@ -20,8 +19,7 @@ class FavoriteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Book $book)
-    {
+    public function store(Request $request, Book $book) {
         $user = $book->favoriteUsers()->find($request->user()->id);
         if ($user) {
             // お気に入り済みなら解除

@@ -125,13 +125,7 @@ class BookSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
-        /**
-         * books テーブルに書籍データを11件投入する。
-         * 登録者は User::first()（山田太郎）とする。
-         */
-
+    public function run(): void {
         foreach ($this->initialValues as $value) {
             // ジャンル名から該当するID群を取得する
             $genreIds = Genre::whereIn('name', $value['ジャンル'])->pluck('id');

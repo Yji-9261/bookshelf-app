@@ -27,8 +27,7 @@ class FavoriteSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         $users = User::all();
         foreach ($this->initialValues as $index => $values) {
             $users[$index]->favoriteBooks()->syncWithoutDetaching($values);

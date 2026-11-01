@@ -53,8 +53,7 @@ class EditBookTest extends TestCase
     }
 
     /** ゲストとして書籍編集画面へアクセスする */
-    public function testCannotGuestEditBook(): void
-    {
+    public function testCannotGuestEditBook(): void {
         // 1. 書籍を作成する
         // 2. ゲストとしてGET /books/{book}/editにアクセス
         // 3. テスト: ログイン画面にリダイレクトする
@@ -66,24 +65,25 @@ class EditBookTest extends TestCase
 
 
     /** 書籍編集画面が表示される */
-    public function testEditView(): void
-    {
+    public function testEditView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 対象書籍の登録者として認証し、書籍編集画面にアクセス
         // 3. テスト: タイトル・著者・ISBN・出版日・説明・画像URLに対象書籍の初期値が表示される
         // 4. テスト: 全ジャンルが表示され、対象書籍のジャンルだけが選択されている
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $user = User::firstOrFail();
-        $book = $user->registeredBooks()->with(['genres', 'reviews.user'])->firstOrFail();
+        $book = $user->registeredBooks()
+            ->with(['genres', 'reviews.user'])
+            ->firstOrFail();
 
         // 2
         $response = $this->actingAs($user)
             ->get(route('books.edit', $book))
             ->assertOk()
             ->assertViewIs('books.edit')
-            ->assertViewHas('book', fn(Book $shownBook) => $shownBook->is($book));
+            ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book));
 
         // 3
         $document = new \DOMDocument();
@@ -93,7 +93,7 @@ class EditBookTest extends TestCase
         $this->assertCount(1, $forms);
         $form = $forms->item(0);
 
-        foreach (['title', 'author', 'isbn', 'published_date', 'image_url'] as $field) {
+        foreach (['title', 'author', 'isbn', 'image_url'] as $field) {
             $inputs = $xpath->query('.//input[@name="' . $field . '"]', $form);
             $this->assertCount(1, $inputs);
             $this->assertSame((string) $book->$field, $inputs->item(0)->getAttribute('value'));
@@ -101,6 +101,11 @@ class EditBookTest extends TestCase
         $descriptions = $xpath->query('.//textarea[@name="description"]', $form);
         $this->assertCount(1, $descriptions);
         $this->assertSame((string) $book->description, $descriptions->item(0)->textContent);
+
+        // sqliteはdateimeでcastされるのでdate部だけ取得し検証
+        $published_date = $xpath->query('.//input[@name="' . 'published_date' . '"]', $form);
+        $this->assertCount(1, $published_date);
+        $this->assertSame((string) $book->published_date->toDateString(), $published_date->item(0)->getAttribute('value'));
 
         // 4
         $genres = Genre::all();
@@ -117,15 +122,14 @@ class EditBookTest extends TestCase
     }
 
     /** 正常な入力をして「更新」ボタンを押下する */
-    public function testUpdateBook(): void
-    {
+    public function testUpdateBook(): void {
         // 1. Seederからテストデータを作成する
         // 2. 書籍登録者として認証し、postEditBook()で書籍更新
         // 3. テスト: 書籍詳細画面にリダイレクトされる
         // 4. テスト: タイトル・著者・ISBN・出版日・説明・画像URL、ジャンルに対象書籍の編集内容が反映されている
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
 
         // 検証データ
@@ -133,14 +137,14 @@ class EditBookTest extends TestCase
         $genre = Genre::where('name', '技術書')->firstOrFail();
         $ownerId = $book->user_id;
         $oldGenreIds = $book->genres()->pluck('genres.id');
-        $data = [
+        $data = collect([
             'title' => '更新後のテスト本',
             'author' => '更新後の著者',
             'isbn' => self::ISBN,
             'published_date' => self::PUBLISHED_DATE,
             'image_url' => 'https://example.com/updated.jpg',
             'description' => '更新後の書籍説明です。',
-        ];
+        ]);
 
         // 2,3
         $this->putUpdateBook(
@@ -157,17 +161,27 @@ class EditBookTest extends TestCase
             ->assertSessionHas('success', '書籍情報を更新しました。');
 
         // 4
-        // DB 登録テスト
-        $this->assertDatabaseHas('books', [
-            'id' => $book->id,
-            'user_id' => $ownerId,
-            ...$data,
-        ]);
+        // DBが指定された通りに更新されているか確認
+        $testKeys = [
+            'title',
+            'author',
+            'isbn',
+            'image_url',
+            'description'
+        ];
+        $this->assertSame(
+            $data->only($testKeys)->toArray(),
+            $book->refresh()->only($testKeys),
+        );
+        // published_dateはdatetimeで格納されているため文字列変換してチェックする
+        $this->assertSame($book->published_date->toDateString(), self::PUBLISHED_DATE);
+
         $this->assertDatabaseCount('books', $bookCount);
         $this->assertDatabaseHas('book_genre', ['book_id' => $book->id, 'genre_id' => $genre->id]);
         foreach ($oldGenreIds as $oldGenreId) {
             $this->assertDatabaseMissing('book_genre', ['book_id' => $book->id, 'genre_id' => $oldGenreId]);
         }
+
         // 実表示テスト
         $response = $this->get(route('books.show', $book))
             ->assertOk()
@@ -181,8 +195,7 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(title編) */
-    public function testTitleValidation(): void
-    {
+    public function testTitleValidation(): void {
         // 1. Seederからテストデータを作成する
         // 2. 書籍登録ユーザーとして認証し、titleを空にしてputアクセス
         // 3. テスト: 編集画面にリダイレクトされ、「書籍のタイトルを入力してください」が表示され、DBの内容が更新されていない
@@ -190,7 +203,7 @@ class EditBookTest extends TestCase
         // 5. テスト: 編集画面に戻り、「書籍のタイトルを255文字以内で入力してください」が表示され、DBの内容が更新されていない
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
         $original = $book->getAttributes();
         $originalGenreIds = $book->genres()->orderBy('genres.id')->pluck('genres.id')->all();
@@ -220,8 +233,7 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(author編) */
-    public function testAuthorValidation(): void
-    {
+    public function testAuthorValidation(): void {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、authorを空にしてputアクセス
         // 3. テスト: 編集画面に戻り、「著者名を入力してください」が表示され、DBの内容が更新されていない
@@ -229,7 +241,7 @@ class EditBookTest extends TestCase
         // 5. テスト: 編集画面に戻り、「著者名を255文字以内で入力してください」が表示され、DBの内容が更新されていない
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
         $original = $book->getAttributes();
         $originalGenreIds = $book->genres()->orderBy('genres.id')->pluck('genres.id')->all();
@@ -260,8 +272,7 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(isbn編) */
-    public function testIsbnValidation(): void
-    {
+    public function testIsbnValidation(): void {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、isbnを空にしてPUT送信
         // 3. テスト: 編集画面に戻り、「ISBNを入力してください」が表示され、DBの内容が更新されていない
@@ -271,7 +282,7 @@ class EditBookTest extends TestCase
         // 7. テスト: 編集画面に戻り、「このISBNは登録済みです」が表示され、DBの内容が更新されていない
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
 
         // 検証データ
@@ -282,6 +293,7 @@ class EditBookTest extends TestCase
 
         // Ruleの中で編集中の書籍をignore設定しているのでそれ以外の書籍のISBNを使用したい
         $otherBook = Book::whereKeyNot($book->id)->firstOrFail();
+
         $cases = [
             ['', 'ISBNを入力してください'],
             ['978111111111-', 'ISBNを13桁の数字で入力してください（ハイフン不要）'],
@@ -308,14 +320,13 @@ class EditBookTest extends TestCase
     }
 
     /** published_dateのnull許容テスト(応用時変更箇所) */
-    public function testPublishedDateNoValidation(): void
-    {
+    public function testPublishedDateNoValidation(): void {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、published_dateを空にしてPUT送信
         // 3. テスト: 編集成功する
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
 
         // 検証データ
@@ -346,14 +357,13 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(genres編) */
-    public function testGenresValidation(): void
-    {
+    public function testGenresValidation(): void {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、genresを空にしてPUT送信
         // 3. テスト: 編集画面に戻り、「ジャンルを選択してください」が表示され、書籍とジャンルの紐付けが更新されていない
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
 
         // 検証データ
@@ -379,8 +389,7 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(image_url編) */
-    public function testImageUrlValidation(): void
-    {
+    public function testImageUrlValidation(): void {
         // 1. テストデータを作成する
         // 2. 書籍登録者として認証し、image_urlを'https:/test'にしてPUT送信
         // 3. テスト: 編集画面に戻り、「URL形式で入力してください」が表示され、DBの内容が更新されていない
@@ -388,7 +397,7 @@ class EditBookTest extends TestCase
         // 5. テスト: 編集画面に戻り、「URLは2048文字以内で入力してください」が表示され、DBの内容が更新されていない
 
         // 1
-        $this->createTestDataFromSeeder();
+        $this->createTestData();
         $book = Book::findOrFail(1);
 
         // 検証データ
@@ -422,20 +431,37 @@ class EditBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     *
-     * @return void
      */
-    private function createTestDataFromSeeder(): void
-    {
-        // シーダーからテストデータを作成する
+    private function createTestData(): void {
+        // シーダーからジャンルを作成する
         $this->seed([
-            UserSeeder::class,
             GenreSeeder::class,
-            BookSeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
-
         ]);
+
+        // 1冊目作成
+        $user = User::factory()->create();
+        $book = Book::factory()->create(['user_id' => $user->id]);
+        $book->genres()->sync([1]);
+
+        // 2冊目作成
+        $otherBook = Book::factory()->create(['user_id' => $user->id]);
+        $otherBook->genres()->sync([2]);
+
     }
+
+    /**
+     * seederからテストデータ生成
+     */
+    // private function createTestDataFromSeeder(): void
+    // {
+    //     // シーダーからテストデータを作成する
+    //     $this->seed([
+    //         UserSeeder::class,
+    //         GenreSeeder::class,
+    //         BookSeeder::class,
+    //         ReviewSeeder::class,
+    //         FavoriteSeeder::class,
+    //         ReviewLikeSeeder::class,
+    //     ]);
+    // }
 }

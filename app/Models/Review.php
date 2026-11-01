@@ -22,8 +22,7 @@ class Review extends Model
      * レビューしたユーザー
      * @return BelongsTo
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
@@ -31,8 +30,7 @@ class Review extends Model
      * レビューされた書籍
      * @return BelongsTo
      */
-    public function book(): BelongsTo
-    {
+    public function book(): BelongsTo {
         return $this->belongsTo(Book::class);
     }
 
@@ -40,8 +38,7 @@ class Review extends Model
      * レビューに対するいいね
      * @return BelongsToMany
      */
-    public function likedByUsers(): BelongsToMany
-    {
+    public function likedByUsers(): BelongsToMany {
         // 外部キーはuser_idとreview_idで規約通りのため省略
         return $this->belongsToMany(User::class, 'review_likes')->withTimestamps();
     }

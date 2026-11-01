@@ -11,8 +11,7 @@ class ReviewLikeSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         // 登録ユーザーは５名存在する
         $userCount = User::count();
 

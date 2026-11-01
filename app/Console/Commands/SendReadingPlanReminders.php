@@ -37,8 +37,15 @@ class SendReadingPlanReminders extends Command
             ->orWhereDate('target_date', today()->addDays(3))
             ->get();
 
+        // 実行対象の読書計画がない場合は-1を返す
+        if ($plans->count() === 0) {
+            return -1;
+        }
+
         $plans->each(function ($plan) {
             Notification::send($plan->user, new ReadingPlanNotification($plan));
         });
+
+        return 0;
     }
 }

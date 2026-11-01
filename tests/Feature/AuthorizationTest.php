@@ -15,8 +15,7 @@ class AuthorizationTest extends TestCase
     /**
      * 認証ユーザーが登録していない書籍の編集画面にアクセスする
      */
-    public function testCannotEditOthersBook(): void
-    {
+    public function testCannotEditOthersBook(): void {
         // 1. GET /books/{book}/edit パスパラメータに認証ユーザー以外が登録した書籍を指定する
         // 2. テスト: statusCode(403)でThis action is unauthorized.が表示される
 
@@ -36,8 +35,7 @@ class AuthorizationTest extends TestCase
     /**
      * 認証ユーザーが投稿していないレビューの編集画面にアクセスする
      */
-    public function testCannotEditOthersReview(): void
-    {
+    public function testCannotEditOthersReview(): void {
         // 1. GET /reviews/{review}/editのパスパラメータに認証ユーザー以外が投稿したレビューを指定する
         // 2. テスト: statusCode(403)でThis action is unauthorized.が表示される
 
@@ -63,8 +61,7 @@ class AuthorizationTest extends TestCase
      * 本人が登録していない書籍の「更新」を実行する
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotUpdateOthersBook(): void
-    {
+    public function testCannotUpdateOthersBook(): void {
         // 1. PUT /books/{$book}のパスパラメータに認証ユーザー以外が登録した書籍を指定する
         // 2. テスト: 更新に失敗する
 
@@ -84,7 +81,7 @@ class AuthorizationTest extends TestCase
                 'published_date' => '2026-01-01',
                 'image_url' => 'https://example.com/updated.jpg',
                 'description' => '更新後の書籍説明です。',
-                'genres' => $book->genres()->get()->map(fn($genre) => $genre->id)->toArray()
+                'genres' => $book->genres()->get()->map(fn ($genre) => $genre->id)->toArray()
             ])
             ->assertStatus(403);
 
@@ -96,8 +93,7 @@ class AuthorizationTest extends TestCase
      * 本人が登録していない書籍の「削除」を実行する
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotDeleteOthersBook(): void
-    {
+    public function testCannotDeleteOthersBook(): void {
         // 1. DELETE /books/{$book}のパスパラメータに認証ユーザー以外が登録した書籍を指定する
         // 2. テスト: 削除に失敗する
 
@@ -121,8 +117,7 @@ class AuthorizationTest extends TestCase
      * 本人が登録していないレビューの「更新」を実行する
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotUpdateOthersReview(): void
-    {
+    public function testCannotUpdateOthersReview(): void {
         // 1. PUT /reviews/{review}のパスパラメータに認証ユーザー以外が投稿したレビューを指定する
         // 2. テスト: 更新に失敗する
 
@@ -154,8 +149,7 @@ class AuthorizationTest extends TestCase
      * 本人が登録していないレビューの「削除」を実行する
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotDeleteOthersReview(): void
-    {
+    public function testCannotDeleteOthersReview(): void {
         // 1. DELETE /reviews/{review}のパスパラメータに認証ユーザー以外が投稿したレビューを指定する
         // 2. テスト: 更新に失敗する
 
@@ -184,8 +178,7 @@ class AuthorizationTest extends TestCase
      * ゲストが書籍の「新規登録」をする
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotCreateBookByGuest(): void
-    {
+    public function testCannotCreateBookByGuest(): void {
         // 1. ゲストとして POST /books/create に正常なリクエストを送信する
         // 2. テスト: 書籍の登録が拒否される
 
@@ -209,8 +202,7 @@ class AuthorizationTest extends TestCase
      * ゲストがレビューの「新規登録」をする
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotCreateReviewByGuest(): void
-    {
+    public function testCannotCreateReviewByGuest(): void {
         // 1. ゲストとして POST /books/{book}/reviews に正常なリクエストを送信する
         // 2. テスト: レビューの投稿が拒否される
 
@@ -235,8 +227,7 @@ class AuthorizationTest extends TestCase
      * ゲストがジャンルの「新規登録」をする
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotCreateGenreByGuest(): void
-    {
+    public function testCannotCreateGenreByGuest(): void {
         // 1. ゲストとして POST /genres に正常なリクエストを送信する
         // 2. テスト: ジャンルの登録が拒否される
 
@@ -256,8 +247,7 @@ class AuthorizationTest extends TestCase
      * ゲストがいいねの「登録」をする
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotCreateReviewLikesByGuest(): void
-    {
+    public function testCannotCreateReviewLikesByGuest(): void {
         // 1. レビュー作成する
         // 2. ゲストとしてPOST /reviews/{review}/likeに正常なリクエストでアクセスする
         // 3. テスト: いいねの登録が拒否される
@@ -283,11 +273,12 @@ class AuthorizationTest extends TestCase
      * ゲストがお気に入りの「登録」をする
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
-    public function testCannotCreateFavoriteByGuest(): void
-    {
+    public function testCannotCreateFavoriteByGuest(): void {
         // 1. 書籍を作成する
         // 2. ゲストとしてPOST /books/{book}/favoritesに正常なリクエストでアクセスする
         // 3. テスト: お気に入りの登録が拒否される
+
+        // 1
         $createdUser = User::factory()->create();
         $book = Book::factory()->create(['user_id' => $createdUser->id]);
         $book->genres()->sync(Genre::createOrFirst(['name' => '小説'])->id);

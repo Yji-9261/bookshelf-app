@@ -9,8 +9,7 @@ class LoginRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -19,16 +18,14 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
             'email.required' => 'emailを入力してください',
             'email.email' => 'emailはメール形式で入力してください',

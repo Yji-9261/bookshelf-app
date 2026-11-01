@@ -31,8 +31,7 @@ class EditGenreTest extends TestCase
 
 
     /** ゲストがジャンル編集リンクを押下するとログイン画面にリダイレクトする */
-    public function testGuestCannotEditGenre(): void
-    {
+    public function testGuestCannotEditGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル編集画面にアクセス
         // 3. テスト: ログイン画面にリダイレクトする
@@ -47,8 +46,7 @@ class EditGenreTest extends TestCase
     }
 
     /** 認証ユーザーはページが正常に表示される */
-    public function testGenreEditView(): void
-    {
+    public function testGenreEditView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとしてジャンル編集画面にアクセス
         // 3. テスト: 選択されたジャンル名が初期値として表示された編集フォームが表示される
@@ -81,8 +79,7 @@ class EditGenreTest extends TestCase
     /**
      * 正常な入力をして「更新」ボタンを押下する
      */
-    public function testUpdateGenre(): void
-    {
+    public function testUpdateGenre(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとして対象ジャンルを指定し、putUpdateGenre($genre)実行
         // 3. テスト: ジャンル一覧にリダイレクトされ、内容が反映されている
@@ -110,8 +107,7 @@ class EditGenreTest extends TestCase
     }
 
     /** 不正な入力をして「更新」ボタンを押下する */
-    public function testNameValidation(): void
-    {
+    public function testNameValidation(): void {
         // 1. seederからテストデータ作成
         // 2. $genre = Genre::where('name','旅行')->firstOrFail();
         // 3. putUpdateGenre(genre: $genre, name:'')を実行
@@ -155,8 +151,7 @@ class EditGenreTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,

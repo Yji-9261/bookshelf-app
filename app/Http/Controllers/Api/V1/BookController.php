@@ -8,12 +8,9 @@ use App\Http\Requests\Api\V1\IndexBookRequest;
 use App\Http\Requests\Api\V1\StoreUpdateBookRequest;
 use App\Models\Book;
 use App\Models\Genre;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
-use Laravel\Sanctum\Sanctum;
-use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
@@ -23,8 +20,7 @@ class BookController extends Controller
      * @param IndexBookRequest $request
      * @return AnonymousResourceCollection
      */
-    public function index(IndexBookRequest $request): AnonymousResourceCollection
-    {
+    public function index(IndexBookRequest $request): AnonymousResourceCollection {
         $validated = $request->validated();
 
         // ページネーションデフォルトは20
@@ -51,7 +47,7 @@ class BookController extends Controller
             ->when(
                 $validated['genre'] ?? null,
                 function ($query, $genre) {
-                    return $query->whereHas('genres', fn($query) => $query->where('name', $genre));
+                    return $query->whereHas('genres', fn ($query) => $query->where('name', $genre));
                 }
             )
             ->paginate($per_page);
@@ -65,8 +61,7 @@ class BookController extends Controller
      * @param StoreUpdateBookRequest $request
      * @return JsonResponse
      */
-    public function store(StoreUpdateBookRequest $request): JsonResponse
-    {
+    public function store(StoreUpdateBookRequest $request): JsonResponse {
         $book = DB::transaction(function () use ($request) {
             $validated = $request->validated();
 
@@ -98,8 +93,7 @@ class BookController extends Controller
      * @param Book $book
      * @return BookResource
      */
-    public function show(Book $book): BookResource
-    {
+    public function show(Book $book): BookResource {
         $book->load('genres', 'reviews.user')
             ->loadCount('reviews')
             ->loadAvg('reviews', 'rating');
@@ -113,8 +107,7 @@ class BookController extends Controller
      * @param Book $book
      * @return BookResource
      */
-    public function update(StoreUpdateBookRequest $request, Book $book): BookResource
-    {
+    public function update(StoreUpdateBookRequest $request, Book $book): BookResource {
         DB::transaction(function () use ($request, $book) {
             $this->authorize('update', $book);
 
@@ -141,8 +134,7 @@ class BookController extends Controller
      * @param Book $book
      * @return JsonResponse
      */
-    public function destroy(Book $book): JsonResponse
-    {
+    public function destroy(Book $book): JsonResponse {
         $this->authorize('delete', $book);
         $book->delete();
         return response()->json(null, 204);

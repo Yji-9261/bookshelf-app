@@ -39,8 +39,7 @@ class LoginTest extends TestCase
      */
     private const ANONYMOUS_PASSWORD = 'pass';
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         parent::setUp();
 
         // ユーザー登録
@@ -54,8 +53,7 @@ class LoginTest extends TestCase
     /**
      * メールアドレスが未入力の場合、バリデーションメッセージが表示される
      */
-    public function testUserEmailRequiredValidation(): void
-    {
+    public function testUserEmailRequiredValidation(): void {
         // 1.       ユーザーを登録する
         // 2.       メールアドレス以外のユーザー情報を入力する
         // 3.       ログインの処理を行う
@@ -73,8 +71,7 @@ class LoginTest extends TestCase
     /**
      * パスワードが未入力の場合、バリデーションメッセージが表示される
      */
-    public function testUserPasswordRequiredValidation(): void
-    {
+    public function testUserPasswordRequiredValidation(): void {
         // 1.       ユーザーを登録する
         // 2.       パスワード以外のユーザー情報を入力する
         // 3.       ログインの処理を行う
@@ -92,8 +89,7 @@ class LoginTest extends TestCase
     /**
      *  登録内容と一致しない場合、バリデーションメッセージが表示される
      */
-    public function testUserEmailNotRegisterValidation(): void
-    {
+    public function testUserEmailNotRegisterValidation(): void {
         // 1. ユーザーを登録する
         // 2. 誤ったユーザー情報を入力する
         // 3. ログインの処理を行う
@@ -118,8 +114,7 @@ class LoginTest extends TestCase
     /**
      * ログアウト後の挙動が意図したものか
      */
-    public function testLogoutBehavior(): void
-    {
+    public function testLogoutBehavior(): void {
         /**
          * 1. POSTでログインし、認証されていることを確認
          * 2. route('logout')にPOSTし、ログアウト

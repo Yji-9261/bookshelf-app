@@ -6,7 +6,6 @@ use App\Enums\ReadingPlanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Validation\Rules\Enum;
 
 class ReadingPlan extends Model
 {
@@ -30,8 +29,7 @@ class ReadingPlan extends Model
      * 読書計画ユーザー
      * @return BelongsTo
      */
-    public function user(): BelongsTo
-    {
+    public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
@@ -39,8 +37,7 @@ class ReadingPlan extends Model
      * 読書計画書籍
      * @return BelongsTo
      */
-    public function book(): BelongsTo
-    {
+    public function book(): BelongsTo {
         return $this->belongsTo(Book::class);
     }
 }

@@ -11,8 +11,7 @@ class ReviewController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUpdateReviewRequest $request, Book $book)
-    {
+    public function store(StoreUpdateReviewRequest $request, Book $book) {
         // 書籍に対してレビューが既に投稿済みならエラーメッセージ表示
         if ($book->reviews()->where('user_id', $request->user()->id)->exists()) {
             return redirect(route('books.show', ['book' => $book]))
@@ -32,8 +31,7 @@ class ReviewController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Review $review)
-    {
+    public function edit(Review $review) {
         $this->authorize('update', $review);
 
         return View('reviews.edit', ['review' => $review]);
@@ -42,8 +40,7 @@ class ReviewController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreUpdateReviewRequest $request, Review $review)
-    {
+    public function update(StoreUpdateReviewRequest $request, Review $review) {
         $this->authorize('update', $review);
         $review->update($request->validated());
 
@@ -54,8 +51,7 @@ class ReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Review $review)
-    {
+    public function destroy(Review $review) {
         $this->authorize('delete', $review);
         $review->delete();
 

@@ -11,8 +11,7 @@ class RankingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
-    {
+    public function index(): View {
         return View('ranking.index', [
             'rankedBooks' => $this->getRankedBooks()
         ]);
@@ -23,15 +22,14 @@ class RankingController extends Controller
      *
      * @return Collection
      */
-    private function getRankedBooks(): Collection
-    {
+    private function getRankedBooks(): Collection {
         // レビューが存在が存在する、平均評価top10を降順で取得する
         return
             Book::withAvg('reviews', 'rating')
                 ->withCount('reviews')
                 ->has('reviews')
                 ->get()
-                ->sortByDesc(fn($book) => $book->reviews_avg_rating)
+                ->sortByDesc('reviews_avg_rating')
                 ->take(10)
                 ->values();
     }

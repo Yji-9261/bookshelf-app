@@ -16,8 +16,7 @@ class AuthenticationController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function login(LoginRequest $request): JsonResponse
-    {
+    public function login(LoginRequest $request): JsonResponse {
         $validated = $request->validated();
 
         // emailとパスワードを比較して一致しているならトークンを返す
@@ -40,8 +39,7 @@ class AuthenticationController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function logout(Request $request): JsonResponse
-    {
+    public function logout(Request $request): JsonResponse {
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

@@ -10,8 +10,7 @@ class StoreUpdateGenreRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -20,8 +19,7 @@ class StoreUpdateGenreRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'name' => [
                 'required',
@@ -33,8 +31,7 @@ class StoreUpdateGenreRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
             'name.required' => 'ジャンルを入力してください',
             'name.unique' => 'このジャンルはすでに登録されています',

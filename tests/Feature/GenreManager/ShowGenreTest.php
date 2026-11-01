@@ -19,8 +19,7 @@ class ShowGenreTest extends TestCase
     use RefreshDatabase;
 
     /** ゲストがジャンル詳細リンクを押下するとログイン画面にリダイレクトする */
-    public function testGuestCannotViewGenre(): void
-    {
+    public function testGuestCannotViewGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル詳細画面にアクセス
         // 3. テスト: ログイン画面にリダイレクトする
@@ -36,8 +35,7 @@ class ShowGenreTest extends TestCase
     }
 
     /** 認証ユーザーはページが正常に表示される */
-    public function testGenreView(): void
-    {
+    public function testGenreView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 全ての書籍に「小説」ジャンルを紐つける
         // 3. 認証ユーザーとして「小説」ジャンル詳細画面にアクセス
@@ -99,8 +97,7 @@ class ShowGenreTest extends TestCase
     /**
      * 書籍タイトルを押すと書籍詳細画面に遷移する
      */
-    public function testBookShowLink(): void
-    {
+    public function testBookShowLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとして書籍に紐ついているジャンルの詳細画面にアクセス
         // 3. テスト: 書籍タイトルに書籍詳細画面へのリンクが存在するか
@@ -140,8 +137,7 @@ class ShowGenreTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,

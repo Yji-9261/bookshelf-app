@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\User;
+use App\Models\Genre;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -14,8 +15,7 @@ class UserTest extends TestCase
     /**
      * パスワードがHash化されているか？
      */
-    public function test_hashed_password(): void
-    {
+    public function test_hashed_password(): void {
         /**
          * 1. User::create(['name'=>'user1', 'email'=>'user1@example.com', 'password'=>'password'])で作成。
          * 2. Test : Usersテーブルに登録されているpasswordがハッシュ化されているか検証
@@ -37,8 +37,7 @@ class UserTest extends TestCase
     /**
      * registeredBooksのリレーションが適切か
      */
-    public function test_registeredBooks(): void
-    {
+    public function test_registeredBooks(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -87,8 +86,7 @@ class UserTest extends TestCase
     /**
      * postReviewsのリレーションが適切か
      */
-    public function test_postReviews(): void
-    {
+    public function test_postReviews(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -148,8 +146,7 @@ class UserTest extends TestCase
     /**
      * likedReviewsのリレーションが適切か
      */
-    public function test_likedReviews(): void
-    {
+    public function test_likedReviews(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍生成
@@ -225,8 +222,7 @@ class UserTest extends TestCase
     /**
      * favoriteBooksのリレーションが適切か
      */
-    public function test_favoriteBooks(): void
-    {
+    public function test_favoriteBooks(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍生成
@@ -289,5 +285,55 @@ class UserTest extends TestCase
         // 9
         $this->assertFalse($user->favoriteBooks()->whereKey($book->id)->exists());
         $this->assertDatabaseMissing('favorites', $favorite);
+    }
+
+    /**
+     * ReadingPlanのリレーションが適切か
+     */
+    public function testReadingPlan(): void {
+        /**
+         * 1. ユーザー作成
+         * 2. $book = $user->registeredBooks()->create([...])で書籍生成
+         * 3. テスト:$userと$readinPlanのリレーションが構築できているか
+         * 4. テスト:$bookと$readinPlanのリレーションが構築されているか
+         * 5. $user->delete()でユーザー削除
+         * 6. テスト:$bookと$readinPlanのリレーションが解除できているか
+         */
+
+        // 1
+        $user = User::factory()->create();
+
+        // 2
+        $book = $user->registeredBooks()->create([
+            'title' => 'テスト書籍',
+            'author' => 'テスト著者',
+            'isbn' => '9784000000000',
+            'published_date' => '2026-10-13',
+        ]);
+        $genre = Genre::factory()->create(['name' => 'ジャンル']);
+        $book->genres()->sync($genre->id);
+
+        // 3
+        $readingValue = [
+            'book_id' => $book->id,
+
+            // sqliteはdatetimeになるため比較用に時刻も明記しておく
+            'target_date' => '2026-01-01 00:00:00',
+        ];
+        $user->readingPlans()->create($readingValue);
+
+        // 4
+        $this->assertTrue($book->readingPlans()->where('user_id', $user->id)->exists());
+        $this->assertTrue($user->readingPlans()->where('book_id', $book->id)->exists());
+        // DBに登録されていることも確認する
+        $this->assertDatabaseHas('reading_plans', $readingValue);
+
+        // 5
+        $user->delete();
+
+        // 6
+        $this->assertSame(0, $book->readingPlans()->count());
+        // DBから削除されていることも確認する
+        $this->assertDatabaseMissing('reading_plans', $readingValue);
     }
 }

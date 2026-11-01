@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,8 +30,7 @@ class Book extends Model
      * 登録したユーザー
      * @return BelongsTo
      */
-    public function registerUser(): BelongsTo
-    {
+    public function registerUser(): BelongsTo {
         return $this->belongsTo(User::class, 'user_id');
     }
 
@@ -40,8 +38,7 @@ class Book extends Model
      * 投稿されたレビュー
      * @return HasMany
      */
-    public function reviews(): HasMany
-    {
+    public function reviews(): HasMany {
         return $this->hasMany(Review::class);
     }
 
@@ -49,8 +46,7 @@ class Book extends Model
      * 紐ついているジャンル
      * @return BelongsToMany
      */
-    public function genres(): BelongsToMany
-    {
+    public function genres(): BelongsToMany {
         // 中間テーブル名(book_genre)、外部キーは規約通りのため省略
         return $this->belongsToMany(Genre::class)->withTimestamps();
     }
@@ -59,8 +55,7 @@ class Book extends Model
      * お気に入り
      * @return BelongsToMany
      */
-    public function favoriteUsers(): BelongsToMany
-    {
+    public function favoriteUsers(): BelongsToMany {
         // 外部キーは規約通り名称のため省略
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
@@ -69,23 +64,7 @@ class Book extends Model
      * 読書計画
      * @return HasMany
      */
-    public function readingPlans(): HasMany
-    {
+    public function readingPlans(): HasMany {
         return $this->hasMany(ReadingPlan::class);
     }
-
-
-    // /**
-    //  * 平均評価点を返す
-    //  *
-    //  * @return Attribute
-    //  */
-    // public function reviewsAvgRating(): Attribute
-    // {
-    //     return Attribute::make(
-    //         get: function () {
-    //             return (float) $this->reviews()->avg('rating');
-    //         }
-    //     );
-    // }
 }

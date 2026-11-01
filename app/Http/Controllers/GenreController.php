@@ -10,8 +10,7 @@ class GenreController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
+    public function index() {
         return view('genres.index', [
             'genres' => Genre::withCount('books')->get()
         ]);
@@ -20,16 +19,14 @@ class GenreController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
+    public function create() {
         return View('genres.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUpdateGenreRequest $request)
-    {
+    public function store(StoreUpdateGenreRequest $request) {
         $validated = $request->validated();
         Genre::firstOrCreate($validated);
 
@@ -40,8 +37,7 @@ class GenreController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Genre $genre)
-    {
+    public function show(Genre $genre) {
         return View('genres.show', [
             'genre' => $genre,
             'books' => $genre->books()->paginate(10)
@@ -51,16 +47,14 @@ class GenreController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Genre $genre)
-    {
+    public function edit(Genre $genre) {
         return View('genres.edit', ['genre' => $genre]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreUpdateGenreRequest $request, Genre $genre)
-    {
+    public function update(StoreUpdateGenreRequest $request, Genre $genre) {
         $validated = $request->validated();
         $genre->update($validated);
 
@@ -71,8 +65,7 @@ class GenreController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Genre $genre)
-    {
+    public function destroy(Genre $genre) {
         $stateMessage = [];
 
         if ($genre->books()->exists()) {

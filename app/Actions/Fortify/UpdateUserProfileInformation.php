@@ -18,8 +18,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      *
      * @throws ValidationException
      */
-    public function update(User $user, array $input): void
-    {
+    public function update(User $user, array $input): void {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
 
@@ -48,8 +47,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      *
      * @param  array<string, string>  $input
      */
-    protected function updateVerifiedUser(User $user, array $input): void
-    {
+    protected function updateVerifiedUser(User $user, array $input): void {
         $user->forceFill([
             'name' => $input['name'],
             'email' => $input['email'],

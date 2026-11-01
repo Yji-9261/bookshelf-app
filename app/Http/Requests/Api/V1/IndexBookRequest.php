@@ -9,8 +9,7 @@ class IndexBookRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -19,8 +18,7 @@ class IndexBookRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'keyword' => ['sometimes', 'string', 'max:255'],
             'genre' => ['sometimes', 'string', 'exists:genres,name'],
@@ -29,8 +27,7 @@ class IndexBookRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
             'keyword.string' => 'キーワードは文字列で入力して下さい',
             'keyword.max' => 'キーワードを255文字以内で入力してください',

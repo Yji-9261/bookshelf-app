@@ -12,14 +12,16 @@ class BookResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
-    {
+    public function toArray(Request $request): array {
         return [
             'id' => $this->id,
             'title' => $this->title,
             'author' => $this->author,
             'isbn' => $this->isbn,
-            'published_date' => $this->published_date,
+
+            // 応用編からnull許容
+            'published_date' => $this->published_date?->toDateString(),
+
             'image_url' => $this->image_url,
             'description' => $this->description,
             'genres' => GenreResource::collection($this->whenLoaded('genres')),
@@ -38,8 +40,7 @@ class BookResource extends JsonResource
      * @param Request $request
      * @return mixed|\Illuminate\Http\Resources\MissingValue
      */
-    private function getReviews(Request $request)
-    {
+    private function getReviews(Request $request) {
         // 一覧表示以外の詳細・登録時に出力
         return $this->when(
             !$request->routeIs('books.index'),

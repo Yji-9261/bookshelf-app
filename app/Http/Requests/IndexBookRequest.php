@@ -3,8 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-
 use App\Enums\Sort;
 
 class IndexBookRequest extends FormRequest
@@ -12,8 +10,7 @@ class IndexBookRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -22,8 +19,7 @@ class IndexBookRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'keyword' => ['nullable', 'sometimes', 'string', 'max:255'],
             'genre' => ['nullable', 'sometimes', 'integer'],

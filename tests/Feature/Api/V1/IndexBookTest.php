@@ -19,8 +19,7 @@ class IndexBookTest extends TestCase
     use RefreshDatabase;
 
     /** API書籍一覧を取得し期待通りのレスポンスが返ってくる */
-    public function testBooksIndex(): void
-    {
+    public function testBooksIndex(): void {
         // 1. 21件の書籍データを作成する
         // 2. GET /api/v1/booksにアクセス
         // 3. テスト: json出力構造が期待通りか
@@ -59,8 +58,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のページネーションとページ指定は想定通りか */
-    public function testBooksPagination(): void
-    {
+    public function testBooksPagination(): void {
         // 1. Seederからテストデータ生成
         // 2. GET /api/v1/books?per_page=1&page=1でアクセス
         // 3. テスト: 1冊の書籍情報と、1件/ページのページ情報が返る
@@ -69,7 +67,11 @@ class IndexBookTest extends TestCase
 
         // 1
         $this->createTestDataFromSeeder();
-        $books = Book::with('genres')->withCount('reviews')->orderBy('id')->get();
+        $books = Book::with('genres')
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->orderBy('id')
+            ->get();
 
         // 2〜5: pageを明示して1ページ目と2ページ目を取得・検証
         foreach ([1, 2] as $page) {
@@ -88,8 +90,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のkeyword検索は想定通りか */
-    public function testBooksKeywordSearch(): void
-    {
+    public function testBooksKeywordSearch(): void {
         // 1. 1冊目=title: テスト, author: author1
         //    2冊目=title: 検証, author: author2
         //    の 2書籍を作成する
@@ -109,8 +110,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のgenre検索は想定通りか */
-    public function testBooksGenreSearch(): void
-    {
+    public function testBooksGenreSearch(): void {
         // 1. seederからテストデータ作成
         // 2. GET /api/v1/books?genre='小説'でアクセス
         // 3. テスト: ジャンル小説のものだけ取得できているか
@@ -139,8 +139,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のページネーション異常値入力時のテスト */
-    public function testPerPageValidation(): void
-    {
+    public function testPerPageValidation(): void {
         // 1. GET /api/v1/books?per_page=abcでアクセス
         // 2. テスト: 「数値を入力してください」がエラーレスポンスとして返る
         // 3. GET /api/v1/books?per_page=0でアクセス
@@ -165,8 +164,7 @@ class IndexBookTest extends TestCase
         }
     }
     /** 書籍一覧のページ異常値入力時のテスト */
-    public function testPageValidation(): void
-    {
+    public function testPageValidation(): void {
         // 1. GET /api/v1/books?page=abcでアクセス
         // 2. テスト: 「数値を入力してください」がエラーレスポンスとして返る
         // 3. GET /api/v1/books?page=0でアクセス
@@ -189,8 +187,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のkeyword異常値入力時のテスト */
-    public function testKeywordValidation(): void
-    {
+    public function testKeywordValidation(): void {
         // 1. GET /api/v1/books?keyword[]=testでアクセス
         // 2. テスト: 「キーワードは文字列で入力して下さい」がエラーレスポンスとして返る
         // 3. GET /api/v1/books?keywordに256文字でアクセス
@@ -213,8 +210,7 @@ class IndexBookTest extends TestCase
     }
 
     /** 書籍一覧のgenre異常値入力時のテスト */
-    public function testGenreValidation(): void
-    {
+    public function testGenreValidation(): void {
         // 1. GET /api/v1/books?genre=testでアクセス
         // 2. テスト: 「ジャンルが存在しません」がエラーレスポンスとして返る
 
@@ -228,14 +224,12 @@ class IndexBookTest extends TestCase
     }
 
     /** クエリパラメータを付けて書籍一覧APIにアクセスする */
-    private function getBooks(array $query = []): TestResponse
-    {
+    private function getBooks(array $query = []): TestResponse {
         return $this->requestBooks($query)->assertOk();
     }
 
     /** 正常・異常の両ケースで使う書籍一覧APIへのリクエスト */
-    private function requestBooks(array $query = []): TestResponse
-    {
+    private function requestBooks(array $query = []): TestResponse {
         $url = '/api/v1/books';
         if ($query !== []) {
             $url .= '?' . http_build_query($query);
@@ -245,22 +239,28 @@ class IndexBookTest extends TestCase
     }
 
     /** 1件の書籍情報をDBの値と照合する */
-    private function assertBookData(TestResponse $response, Book $book, int $index = 0): void
-    {
-        foreach (['id', 'title', 'author', 'isbn', 'published_date', 'image_url', 'description'] as $field) {
+    private function assertBookData(TestResponse $response, Book $book, int $index = 0): void {
+        foreach (['id', 'title', 'author', 'isbn', 'image_url', 'description'] as $field) {
             $response->assertJsonPath("data.{$index}.{$field}", $book->$field);
         }
+
+        // published_dateは日付で比較
+        $response->assertJsonPath(
+            "data.{$index}.published_date",
+            $book->published_date->toDateString()
+        );
+
         $this->assertEqualsCanonicalizing(
             $book->genres->map(fn ($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
             $response->json("data.{$index}.genres")
         );
+        // 平均値はfloatのため誤差を許容する
         $this->assertEqualsWithDelta($book->reviews_avg_rating, $response->json("data.{$index}.reviews_avg_rating"), 0.00001);
         $response->assertJsonPath("data.{$index}.reviews_count", $book->reviews_count);
     }
 
     /** レスポンスに期待する書籍だけが含まれていることを確認する */
-    private function assertBookIds(TestResponse $response, array $expectedIds): void
-    {
+    private function assertBookIds(TestResponse $response, array $expectedIds): void {
         $response->assertJsonCount(count($expectedIds), 'data');
         $this->assertEqualsCanonicalizing($expectedIds, array_column($response->json('data'), 'id'));
         $response->assertJsonPath('meta.total', count($expectedIds));
@@ -269,8 +269,7 @@ class IndexBookTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
@@ -279,7 +278,6 @@ class IndexBookTest extends TestCase
             ReviewSeeder::class,
             FavoriteSeeder::class,
             ReviewLikeSeeder::class,
-
         ]);
     }
 }

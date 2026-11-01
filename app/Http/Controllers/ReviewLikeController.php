@@ -10,8 +10,7 @@ class ReviewLikeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Review $review)
-    {
+    public function store(Request $request, Review $review) {
         $user = $review->likedByUsers()->find($request->user()->id);
         if ($user) {
             // いいね済みなら解除

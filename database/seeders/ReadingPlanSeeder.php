@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\ReadingPlan;
 use App\Models\User;
 use App\Enums\ReadingPlanStatus;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ReadingPlanSeeder extends Seeder
@@ -13,8 +12,7 @@ class ReadingPlanSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         $yamada = User::where('name', '山田太郎')->firstOrFail();
         $suzuki = User::where('name', '鈴木花子')->firstOrFail();
 

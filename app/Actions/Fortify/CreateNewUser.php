@@ -20,8 +20,7 @@ class CreateNewUser implements CreatesNewUsers
      *
      * @throws ValidationException
      */
-    public function create(array $input): User
-    {
+    public function create(array $input): User {
         Validator::make(
             $input,
             [

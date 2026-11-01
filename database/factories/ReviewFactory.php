@@ -16,8 +16,7 @@ class ReviewFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+    public function definition(): array {
         $comments = [
             1 => [
                 '残念ながら合いませんでした。',

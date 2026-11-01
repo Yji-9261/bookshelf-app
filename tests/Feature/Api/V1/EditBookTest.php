@@ -7,15 +7,61 @@ use App\Models\Book;
 use App\Models\Genre;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class EditBookTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * ゲストは書籍の更新ができない
+     */
+    public function testGuestCannotBooksUpdate(): void {
+        // 1. ユーザー・書籍を紐つけ作成
+        // 2. 認証せずに有効なデータをPUT /api/v1/books/{book}へ送信する
+        // 3. テスト: 401エラーが発生する
+        // 4. テスト: DB内の書籍が変更されていない
+
+        // 1
+        $postData = $this->validBookData();
+        $book = Book::where('isbn', '9782222222222')->firstOrFail();
+        $original = $book->getAttributes();
+
+        // 2,3
+        $this->putJson('/api/v1/books/' . $book->id, $postData)
+            ->assertUnauthorized();
+
+        // 4
+        $this->assertSame($original, $book->refresh()->getAttributes());
+    }
+
+    /**
+     * 書籍登録したユーザー以外は書籍の更新ができない
+     */
+    public function testCannotUpdateOthersBook(): void {
+        // 1. ユーザー・書籍を紐つけ作成
+        // 2. 書籍登録していないユーザーを作成
+        // 3. 書籍登録していないユーザーで認証し、有効なデータをPUT /api/v1/books/{book}へ送信する
+        // 4. テスト: 403エラーが発生する
+        // 5. テスト: DB内の書籍が変更されていない
+
+        // 1
+        $postData = $this->validBookData();
+        $book = Book::where('isbn', '9782222222222')->firstOrFail();
+        $original = $book->getAttributes();
+
+        // 2~4
+        Sanctum::actingAs(User::factory()->create(), ['*']);
+        $this->putJson('/api/v1/books/' . $book->id, $postData)
+            ->assertForbidden();
+
+        // 5
+        $this->assertSame($original, $book->refresh()->getAttributes());
+    }
+
     /** API書籍更新を実行し期待通りの結果となる */
-    public function testBooksUpdate(): void
-    {
+    public function testBooksUpdate(): void {
         // 1. ユーザー・書籍・変更前後のジャンルを作成する
         // 2. 各項目とジャンルを変更した有効なデータをPUT /api/v1/books/{book}へ送信する
         // 3. テスト: HTTP 200で更新後の書籍詳細と同じ形式のJSONが返る
@@ -40,6 +86,9 @@ class EditBookTest extends TestCase
             'description' => '更新した説明',
             'genres' => [$newGenre->name],
         ];
+
+        // 認証し書籍更新実行
+        Sanctum::actingAs($user, ['*']);
         $this->putJson('/api/v1/books/' . $book->id, $data)
             ->assertOk()
             ->assertExactJson([
@@ -59,25 +108,30 @@ class EditBookTest extends TestCase
             ]);
 
         // 4
-        unset($data['genres']);
+        // 日付検証
+        $this->comparePublishedDate($book->refresh(), $data['published_date']);
+
+        // ジャンルと日付はそのままではデータベース比較できないので除外し別個で確認
+        unset($data['genres'], $data['published_date']);
         $this->assertDatabaseHas('books', ['id' => $book->id, ...$data]);
         $this->assertDatabaseCount('books', $bookCount);
+
+        // ジャンル比較
         $this->assertDatabaseHas('book_genre', ['book_id' => $book->id, 'genre_id' => $newGenre->id]);
         $this->assertDatabaseMissing('book_genre', ['book_id' => $book->id, 'genre_id' => $oldGenre->id]);
         $this->assertSame(1, $book->genres()->count());
     }
 
     /** 存在しない書籍のAPI書籍更新を実行した時、期待通りのエラーレスポンスが返ってくる */
-    public function testBookNotFound(): void
-    {
+    public function testBookNotFound(): void {
         // 1. 1件の書籍を作成する
         // 2. PUT /api/v1/books/2にアクセス
         // 3. テスト: statuscode: 404 {'error' => '書籍情報が見つかりませんでした。'}が返ってくるか
 
-        Book::factory()->create()
-            ->genres()
-            ->sync(Genre::create(['name' => '小説'])->id);
+        $book = Book::factory()->create();
+        $book->genres()->sync(Genre::create(['name' => '小説'])->id);
 
+        Sanctum::actingAs($book->registerUser, ['*']);
         $this->putJson('/api/v1/books/2')
             ->assertStatus(404)
             ->assertJson([
@@ -86,8 +140,7 @@ class EditBookTest extends TestCase
     }
 
     /** タイトルの不正入力を拒否する */
-    public function testTitleValidation(): void
-    {
+    public function testTitleValidation(): void {
         // 1. 有効な更新データを用意する
         // 2. タイトルを未入力・256文字・配列に変更してPUTする
         // 3. HTTP 422とタイトルのエラーを確認し、既存データが変更されないことを確認する
@@ -99,8 +152,7 @@ class EditBookTest extends TestCase
     }
 
     /** 著者名の不正入力を拒否する */
-    public function testAuthorValidation(): void
-    {
+    public function testAuthorValidation(): void {
         // 1. 有効な更新データを用意する
         // 2. 著者名を未入力・256文字・配列に変更してPUTする
         // 3. HTTP 422と著者名のエラーを確認し、既存データが変更されないことを確認する
@@ -112,8 +164,7 @@ class EditBookTest extends TestCase
     }
 
     /** ISBNの未入力・形式不正・重複を拒否する */
-    public function testIsbnValidation(): void
-    {
+    public function testIsbnValidation(): void {
         // 1. 登録済みISBNの書籍を作成する
         // 2. ISBNを未入力・ハイフン入り・12桁・14桁・登録済みに変更してPUTする
         // 3. HTTP 422とISBNのメッセージを確認し、既存データが変更されないことを確認する
@@ -128,22 +179,32 @@ class EditBookTest extends TestCase
         ]);
     }
 
-    /** 出版日の未入力・形式不正・存在しない日付を拒否する */
-    public function testPublishedDateValidation(): void
-    {
+    /** 出版日の形式不正・存在しない日付を拒否する */
+    public function testPublishedDateValidation(): void {
         // 1. 有効な更新データを用意する
         // 2. 出版日を未入力・形式不正・存在しない日付に変更してPUTする
         // 3. HTTP 422と出版日のメッセージを確認し、既存データが変更されないことを確認する
         $this->assertInvalidBookCases('published_date', [
-            ['', '出版日を入力してください'],
             ['26-1-1', '出版日をyyyy-mm-dd形式で入力してください'],
             ['2026-02-30', '出版日をyyyy-mm-dd形式で入力してください'],
         ]);
     }
 
+    /** 出版日の未入力を許容する */
+    public function testPublishedDateNullable(): void {
+        $postData = $this->validBookData();
+        $postData['published_date'] = '';
+        $book = Book::where('isbn', '9782222222222')->firstOrFail();
+
+        Sanctum::actingAs($book->registerUser, ['*']);
+        $this->putJson('/api/v1/books/' . $book->id, $postData)
+            ->assertOk();
+
+        $this->assertNull($book->refresh()->published_date);
+    }
+
     /** ジャンルの未選択・型不正・未登録名を拒否する */
-    public function testGenresValidation(): void
-    {
+    public function testGenresValidation(): void {
         // 1. 登録済みジャンルを含む有効なデータを用意する
         // 2. ジャンルを空配列・文字列・数値要素・未登録名に変更してPUTする
         // 3. HTTP 422と該当キーのエラーを確認し、書籍と紐付けが変更されないことを確認する
@@ -156,8 +217,7 @@ class EditBookTest extends TestCase
     }
 
     /** 画像URLの形式不正と文字数超過を拒否する */
-    public function testImageUrlValidation(): void
-    {
+    public function testImageUrlValidation(): void {
         // 1. 有効な更新データを用意する
         // 2. 画像URLを形式不正・2049文字に変更してPUTする
         // 3. HTTP 422と画像URLのメッセージを確認し、既存データが変更されないことを確認する
@@ -169,32 +229,15 @@ class EditBookTest extends TestCase
     }
 
     /** 説明の型不正を拒否する */
-    public function testDescriptionValidation(): void
-    {
+    public function testDescriptionValidation(): void {
         // 1. 有効な更新データを用意する
         // 2. 説明に配列を指定してPUTする
         // 3. HTTP 422と説明のエラーを確認し、既存データが変更されないことを確認する
         $this->assertInvalidBookCases('description', [[['不正な型'], null]]);
     }
 
-    /** ユーザーIDの型不正・未登録IDを拒否する */
-    public function testUserIdValidation(): void
-    {
-        // 1. ユーザーを1人作成した有効なデータを用意する
-        // 2. ユーザーIDを省略・null・空文字・非数値・存在しないIDにしてPUTする
-        // 3. HTTP 422とユーザーIDのメッセージを確認し、既存データが変更されないことを確認する
-        $this->assertInvalidBookCases('user_id', [
-            [null, 'ユーザーIDを入力してください', 'user_id', true], // キーを省略
-            [null, 'ユーザーIDを入力してください'],
-            ['', 'ユーザーIDを入力してください'],
-            ['abc', 'ユーザーIDを数値で入力してください'],
-            [999999, '登録済みのユーザーを入力してください'],
-        ]);
-    }
-
     /** 更新対象と、他の項目が有効な更新データを作成する */
-    private function validBookData(): array
-    {
+    private function validBookData(): array {
         $user = User::factory()->create();
         $oldGenre = Genre::firstOrCreate(['name' => '小説']);
         $newGenre = Genre::firstOrCreate(['name' => 'エッセイ']);
@@ -218,14 +261,14 @@ class EditBookTest extends TestCase
     }
 
     /** 不正項目のエラーと、既存書籍・中間レコードの維持を確認する */
-    private function assertInvalidBookCases(string $field, array $cases): void
-    {
+    private function assertInvalidBookCases(string $field, array $cases): void {
         $data = $this->validBookData();
         $book = Book::where('isbn', '9782222222222')->firstOrFail();
         $original = $book->getAttributes();
         $bookCount = Book::count();
         $originalPivots = DB::table('book_genre')->orderBy('id')->get()->toArray();
 
+        Sanctum::actingAs($book->registerUser, ['*']);
         foreach ($cases as $case) {
             [$value, $message] = $case;
             $errorKey = $case[2] ?? $field;
@@ -245,5 +288,13 @@ class EditBookTest extends TestCase
             $this->assertDatabaseCount('books', $bookCount);
             $this->assertEquals($originalPivots, DB::table('book_genre')->orderBy('id')->get()->toArray());
         }
+    }
+
+    /**
+     * データベース内の日付を比較する(sqliteはdatetime式、mysql,modelではdateで扱っているもの)
+     * @return void
+     */
+    private function comparePublishedDate(Book $editedBook, string $compareDateString) {
+        $this->assertSame($editedBook->published_date->toDateString(), $compareDateString);
     }
 }

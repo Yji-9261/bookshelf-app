@@ -4,6 +4,9 @@
         "php_unit_method_casing": false,
                 "concat_space": {
             "spacing": "one"
+        },
+        "braces_position": {
+            "functions_opening_brace": "same_line"
         }
     },
     "exclude":[

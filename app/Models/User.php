@@ -51,8 +51,7 @@ class User extends Authenticatable
      * 登録した書籍
      * @return HasMany
      */
-    public function registeredBooks(): HasMany
-    {
+    public function registeredBooks(): HasMany {
         return $this->hasMany(Book::class);
     }
 
@@ -60,8 +59,7 @@ class User extends Authenticatable
      * 投稿したレビュー
      * @return HasMany
      */
-    public function postReviews(): HasMany
-    {
+    public function postReviews(): HasMany {
         return $this->hasMany(Review::class);
     }
 
@@ -69,8 +67,7 @@ class User extends Authenticatable
      * レビューに対するいいね
      * @return BelongsToMany
      */
-    public function likedReviews(): BelongsToMany
-    {
+    public function likedReviews(): BelongsToMany {
         // 外部キーはuser_idとreview_idで規約通りのため省略
         return $this->belongsToMany(Review::class, 'review_likes')->withTimestamps();
     }
@@ -79,8 +76,7 @@ class User extends Authenticatable
      * お気に入り書籍
      * @return BelongsToMany
      */
-    public function favoriteBooks(): BelongsToMany
-    {
+    public function favoriteBooks(): BelongsToMany {
         // 外部キーはuser_idとbook_idで規約通りのため省略
         return $this->belongsToMany(Book::class, 'favorites')->withTimestamps();
     }
@@ -89,8 +85,7 @@ class User extends Authenticatable
      * 読書計画
      * @return HasMany
      */
-    public function readingPlans(): HasMany
-    {
+    public function readingPlans(): HasMany {
         return $this->hasMany(ReadingPlan::class);
     }
 }

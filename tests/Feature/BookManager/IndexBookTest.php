@@ -20,8 +20,7 @@ class IndexBookTest extends TestCase
     /**
      * ゲスト、認証ユーザー共に'/','/books'にアクセスし、書籍一覧画面が表示されることを確認する
      */
-    public function testBookIndex(): void
-    {
+    public function testBookIndex(): void {
         // 1.ゲストが '/'にアクセスする
         // 2.テスト: 意図した画面('books.index')が表示される
         // 3.ゲストが '/books'にアクセスする
@@ -39,8 +38,7 @@ class IndexBookTest extends TestCase
             ->assertViewIs('books.index');
 
         // 3,4
-        $this->get('/books')->assertRedirect('/');
-        $this->followingRedirects()->get('/books')
+        $this->get('/books')
             ->assertOk()
             ->assertViewIs('books.index');
 
@@ -51,8 +49,7 @@ class IndexBookTest extends TestCase
             ->assertViewIs('books.index');
 
         // 7,8
-        $this->get('/books')->assertRedirect('/');
-        $this->followingRedirects()->get('/books')
+        $this->get('/books')
             ->assertOk()
             ->assertViewIs('books.index');
     }
@@ -60,8 +57,7 @@ class IndexBookTest extends TestCase
     /**
      * 書籍一覧が１０件でページネーションされている
      */
-    public function testBookIndexPagination(): void
-    {
+    public function testBookIndexPagination(): void {
         // 1. '/'にアクセスする
         // 2. テスト: 1ページ目に書籍が10件表示されている
         // 3. 2ページ目のリンクにアクセス
@@ -106,8 +102,7 @@ class IndexBookTest extends TestCase
     /**
      * ゲスト、認証ユーザー共に書籍タイトルから詳細画面に遷移できる
      */
-    public function testBookShowLink(): void
-    {
+    public function testBookShowLink(): void {
         // 1.ゲストが '/'にアクセスする
         // 2.書籍詳細画面へのリンクがあることを確認し、リンク先にアクセス
         // 3.テスト: 意図した画面('books.show')が表示される
@@ -146,8 +141,7 @@ class IndexBookTest extends TestCase
     /**
      * ゲストは書籍登録にアクセスしたらログイン画面に遷移される
      */
-    public function testGuestCannotCreateBook(): void
-    {
+    public function testGuestCannotCreateBook(): void {
         // 1.ゲストが '/'にアクセスする
         // 2.書籍登録リンクが存在することを確認し、リンク先にアクセス
         // 3.テスト: ログイン画面にリダイレクト
@@ -166,8 +160,7 @@ class IndexBookTest extends TestCase
     /**
      * 認証ユーザーは書籍登録画面に遷移する
      */
-    public function testAuthUserCanViewCreate(): void
-    {
+    public function testAuthUserCanViewCreate(): void {
         // 1.認証ユーザーが '/'にアクセスする
         // 2.書籍登録リンクが存在することを確認し、リンク先にアクセス
         // 3.テスト: 書籍登録画面に遷移する
@@ -189,11 +182,8 @@ class IndexBookTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     *
-     * @return void
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,

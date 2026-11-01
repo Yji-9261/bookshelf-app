@@ -20,8 +20,7 @@ class RegistrationTest extends TestCase
     /**
      * 名前入力のバリデーションエラーメッセージが表示される
      */
-    public function testUserName(): void
-    {
+    public function testUserName(): void {
         // 1. 名前以外のユーザー情報を入力して登録
         // 2. テスト: 「お名前を入力してください」というバリデーションメッセージが表示される
         // 3. 他の項目は有効な値とし、名前に256文字を入力して登録
@@ -45,8 +44,7 @@ class RegistrationTest extends TestCase
     /**
      * メールアドレスのバリデーションエラーメッセージが表示される
      */
-    public function testUserEmail(): void
-    {
+    public function testUserEmail(): void {
         // 1. メールアドレス以外のユーザー情報を入力し登録する
         // 2. テスト: 「メールアドレスを入力してください」というバリデーションメッセージが表示される
         // 3. メールアドレス以外のユーザー情報を入力し、メールアドレスにアドレス形式でない文字列を入力して登録する
@@ -80,8 +78,7 @@ class RegistrationTest extends TestCase
     /**
      * パスワードが8文字未満の場合、バリデーションメッセージが表示される
      */
-    public function testUserPasswordMin(): void
-    {
+    public function testUserPasswordMin(): void {
         // 1. パスワードを8文字未満にし、ユーザー情報を入力する
         // 2. 会員登録の処理を行う
         // 「パスワードは8文字以上で入力してください」というバリデーションメッセージが表示される
@@ -98,8 +95,7 @@ class RegistrationTest extends TestCase
     /**
      * パスワードが一致しない場合、バリデーションメッセージが表示される
      */
-    public function testUserPasswordConfirmed(): void
-    {
+    public function testUserPasswordConfirmed(): void {
         // 1. 確認用のパスワードとパスワードを一致させず、ユーザー情報を入力する
         // 2. 会員登録の処理を行う
         // 「パスワードと一致しません」というバリデーションメッセージが表示される
@@ -119,8 +115,7 @@ class RegistrationTest extends TestCase
     /**
      * パスワードが未入力の場合、バリデーションメッセージが表示される
      */
-    public function testUserPasswordRequired(): void
-    {
+    public function testUserPasswordRequired(): void {
         // 1. パスワード以外のユーザー情報を入力する
         // 2. 会員登録の処理を行う
         // 「パスワードを入力してください」というバリデーションメッセージが表示される
@@ -139,8 +134,7 @@ class RegistrationTest extends TestCase
     /**
      * フォームに内容が入力されていた場合、データが正常に保存される
      */
-    public function testUserCanRegister(): void
-    {
+    public function testUserCanRegister(): void {
         // 1. 正常の入力で会員登録の処理を行う
         // 意図した遷移先('/')にリダイレクトされるか？
         // データベースに登録したユーザー情報が保存される
@@ -158,8 +152,7 @@ class RegistrationTest extends TestCase
     /**
      * 会員登録画面が正しく表示され、ログイン画面に遷移できるか？
      */
-    public function testUserCanTransitionLogin(): void
-    {
+    public function testUserCanTransitionLogin(): void {
         /**
          * 1.登録画面が正しく表示され、Login画面へのリンクがあるか？
          * 2.getでリンク先にアクセス

@@ -20,12 +20,10 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
+    public function register(): void {
         //ログアウト後のリダイレクト先を設定
         $this->app->instance(LogoutResponse::class, new class () implements LogoutResponse {
-            public function toResponse($request)
-            {
+            public function toResponse($request) {
                 return redirect('/login');
             }
         });
@@ -34,8 +32,7 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
+    public function boot(): void {
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);

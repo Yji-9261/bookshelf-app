@@ -13,8 +13,7 @@ class ShowBookTest extends TestCase
     use RefreshDatabase;
 
     /** API書籍詳細を取得し期待通りのレスポンスが返ってくる */
-    public function testBooksShow(): void
-    {
+    public function testBooksShow(): void {
         // 1. 1件の書籍を作成する
         // 2. 作成した書籍に['小説', 'エッセイ']を紐つける
         // 3. 作成した書籍に
@@ -54,7 +53,7 @@ class ShowBookTest extends TestCase
                     'title' => $book->title,
                     'author' => $book->author,
                     'isbn' => $book->isbn,
-                    'published_date' => $book->published_date,
+                    'published_date' => $book->published_date->toDateString(),
                     'image_url' => $book->image_url,
                     'description' => $book->description,
                     'genres' => $genres->map(fn ($genre) => ['id' => $genre->id, 'name' => $genre->name])->all(),
@@ -72,8 +71,7 @@ class ShowBookTest extends TestCase
     }
 
     /** 存在しない書籍のAPI書籍詳細を実行した時、期待通りのエラーレスポンスが返ってくる */
-    public function testBookNotFound(): void
-    {
+    public function testBookNotFound(): void {
         // 1. 1件の書籍を作成する
         // 2. GET /api/v1/books/2にアクセス
         // 3. テスト: statuscode: 404 {'error' => '書籍情報が見つかりませんでした。'}が返ってくるか

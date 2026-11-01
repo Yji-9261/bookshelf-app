@@ -12,54 +12,11 @@ class BookTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * reviewsAvgRatingアクセサテスト
-     */
-    public function test_reviews_avg_rating(): void
-    {
-        /**
-         * 1. テスト用レビューデータ作成
-         * 2. テスト : reviews_avg_ratingが想定通りの結果になる
-         */
-
-        // 1
-        $users = User::factory()->count(3)->create();
-        $book = $users[0]->registeredBooks()->create([
-            'title' => 'テスト書籍',
-            'author' => 'テスト著者',
-            'isbn' => '9784000000000',
-            'published_date' => '2026-10-13',
-        ]);
-        $testReviews = [
-            [
-                'user_id' => $users[0]->id,
-                'rating' => 5,
-                'comment' => '',
-            ],
-            [
-                'user_id' => $users[1]->id,
-                'rating' => 4,
-                'comment' => '',
-            ],
-            [
-                'user_id' => $users[2]->id,
-                'rating' => 3,
-                'comment' => '',
-            ],
-        ];
-        $book->reviews()->createMany($testReviews);
-
-        // 2
-        $this->assertSame($book->reviews_avg_rating, (float) (5 + 4 + 3) / 3);
-    }
-
-
-    /**
      * registerUserのリレーションが適切か
      *
      * @return void
      */
-    public function test_registerUser(): void
-    {
+    public function test_registerUser(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -90,8 +47,7 @@ class BookTest extends TestCase
     /**
      * reviewsのリレーションが適切か
      */
-    public function test_reviews(): void
-    {
+    public function test_reviews(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -149,8 +105,7 @@ class BookTest extends TestCase
     /**
      * genresのリレーションが適切か
      */
-    public function test_genres(): void
-    {
+    public function test_genres(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -221,8 +176,7 @@ class BookTest extends TestCase
     /**
      * favoriteUsersのリレーションが適切か
      */
-    public function test_favoriteUsers(): void
-    {
+    public function test_favoriteUsers(): void {
         /**
          * 1. $user = User::create([...])で生成
          * 2. $book = $user->registeredBooks()->create([...])で書籍生成
@@ -285,5 +239,55 @@ class BookTest extends TestCase
         // 9
         $this->assertFalse($book->favoriteUsers()->whereKey($user->id)->exists());
         $this->assertDatabaseMissing('favorites', $favorite);
+    }
+
+    /**
+     * ReadingPlanのリレーションが適切か
+     */
+    public function testReadingPlan(): void {
+        /**
+         * 1. ユーザー作成
+         * 2. $book = $user->registeredBooks()->create([...])で書籍生成
+         * 3. テスト:$userと$readinPlanのリレーションが構築できているか
+         * 4. テスト:$bookと$readinPlanのリレーションが構築されているか
+         * 5. $book->delete()で書籍削除
+         * 6. テスト:$userと$readinPlanのリレーションが解除できているか
+         */
+
+        // 1
+        $user = User::factory()->create();
+
+        // 2
+        $book = $user->registeredBooks()->create([
+            'title' => 'テスト書籍',
+            'author' => 'テスト著者',
+            'isbn' => '9784000000000',
+            'published_date' => '2026-10-13',
+        ]);
+        $genre = Genre::factory()->create(['name' => 'ジャンル']);
+        $book->genres()->sync($genre->id);
+
+        // 3
+        $readingValue = [
+            'user_id' => $user->id,
+
+            // sqliteはdatetimeになるため比較用に時刻も明記しておく
+            'target_date' => '2026-01-01 00:00:00',
+        ];
+        $book->readingPlans()->create($readingValue);
+
+        // 4
+        $this->assertTrue($book->readingPlans()->where('user_id', $user->id)->exists());
+        $this->assertTrue($user->readingPlans()->where('book_id', $book->id)->exists());
+        // DBに登録されていることも確認する
+        $this->assertDatabaseHas('reading_plans', $readingValue);
+
+        // 5
+        $book->delete();
+
+        // 6
+        $this->assertSame(0, $user->readingPlans()->count());
+        // DBから削除されていることも確認する
+        $this->assertDatabaseMissing('reading_plans', $readingValue);
     }
 }

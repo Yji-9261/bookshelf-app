@@ -8,8 +8,7 @@ return new class () extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
+    public function up(): void {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -18,7 +17,7 @@ return new class () extends Migration {
             $table->string('isbn', 13)->unique();
             $table->string('image_url', 2048)->nullable();
             $table->text('description')->nullable();
-            $table->date('published_date');
+            $table->date('published_date')->nullable();
             $table->timestamps();
         });
     }
@@ -26,8 +25,7 @@ return new class () extends Migration {
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
+    public function down(): void {
         Schema::dropIfExists('books');
     }
 };

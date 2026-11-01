@@ -15,8 +15,7 @@ class BookFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+    public function definition(): array {
         $user = User::find(1) ?? User::factory()->create();
         return [
             'user_id' => $user->id,

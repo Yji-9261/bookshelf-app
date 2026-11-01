@@ -9,8 +9,7 @@ class StoreUpdateReviewRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -19,16 +18,14 @@ class StoreUpdateReviewRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string']
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
             'rating.required' => '評価を入力してください',
             'rating.integer' => '評価は数値を入力してください',

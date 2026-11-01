@@ -40,8 +40,7 @@ class EditReviewTest extends TestCase
     }
 
     /** ゲストとしてレビュー編集画面へアクセスする */
-    public function testCannotGuestEditReview(): void
-    {
+    public function testCannotGuestEditReview(): void {
         // 1. レビューを作成する
         // 2. ゲストとしてGET /reviews/{review}/editにアクセス
         // 3. テスト: ログイン画面にリダイレクトする
@@ -51,8 +50,7 @@ class EditReviewTest extends TestCase
     }
 
     /** レビュー編集画面が表示される */
-    public function testEditView(): void
-    {
+    public function testEditView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 対象レビュー投稿者として認証し、レビュー編集画面にアクセス
         // 3. テスト: 既存のrating/commentが初期値として表示された編集フォームが表示される
@@ -66,7 +64,7 @@ class EditReviewTest extends TestCase
             ->get(route('reviews.edit', $review))
             ->assertOk()
             ->assertViewIs('reviews.edit')
-            ->assertViewHas('review', fn(Review $shownReview) => $shownReview->is($review));
+            ->assertViewHas('review', fn (Review $shownReview) => $shownReview->is($review));
 
         // 3
         $document = new \DOMDocument();
@@ -89,8 +87,7 @@ class EditReviewTest extends TestCase
     }
 
     /** 正常な入力をして「更新」ボタンを押下する */
-    public function testUpdateReview(): void
-    {
+    public function testUpdateReview(): void {
         // 1. Seederからテストデータを作成する
         // 2. レビュー投稿者として認証し、putUpdateReview()でレビュー更新
         // 3. テスト: 書籍詳細画面にリダイレクトされる
@@ -145,8 +142,7 @@ class EditReviewTest extends TestCase
      * 不正項目の入力に対して、バリデーションメッセージが表示される(rating編)
      * このテストは、ブラウザ操作ではなく、外部からput送信された時に書き換わることがないかのテスト
      */
-    public function testRatingValidation(): void
-    {
+    public function testRatingValidation(): void {
         // 1. Seederからテストデータを作成する
         // 2. レビュー投稿者として認証し、putUpdateReview(rating: null)でレビュー更新
         // 3. テスト: 更新に失敗し、DBに変化がない
@@ -185,8 +181,7 @@ class EditReviewTest extends TestCase
     }
 
     /** 不正項目の入力に対して、バリデーションメッセージが表示される(comment編) */
-    public function testCommentValidation(): void
-    {
+    public function testCommentValidation(): void {
         // 1. テストデータを作成する
         // 2. レビュー投稿者として認証し、commentを空にしてPUT送信
         // 3. テスト: 編集画面に戻り、「コメントを入力してください」が表示され、DBの内容が更新されていない
@@ -219,8 +214,7 @@ class EditReviewTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
@@ -229,7 +223,6 @@ class EditReviewTest extends TestCase
             ReviewSeeder::class,
             FavoriteSeeder::class,
             ReviewLikeSeeder::class,
-
         ]);
     }
 }

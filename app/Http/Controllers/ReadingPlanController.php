@@ -6,19 +6,16 @@ use App\Models\Book;
 use App\Models\ReadingPlan;
 use App\Enums\ReadingPlanStatus;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use App\Http\Requests\IndexReadingPlanRequest;
 use App\Http\Requests\StoreReadingPlanRequest;
 use App\Http\Requests\UpdateReadingPlanRequest;
-use Illuminate\Database\Eloquent\Collection;
 
 class ReadingPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(IndexReadingPlanRequest $request)
-    {
+    public function index(IndexReadingPlanRequest $request) {
         $validated = $request->validated();
 
         $plans = $request->user()->readingPlans()->when(
@@ -37,8 +34,7 @@ class ReadingPlanController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
+    public function create() {
         return View('reading-plans.create', [
             'books' => Book::all(),
         ]);
@@ -47,8 +43,7 @@ class ReadingPlanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreReadingPlanRequest $request)
-    {
+    public function store(StoreReadingPlanRequest $request) {
         $validated = $request->validated();
 
         // DB登録
@@ -60,20 +55,10 @@ class ReadingPlanController extends Controller
         return redirect(route('reading-plans.index'))->with('success', '読書計画を作成しました。');
     }
 
-    // /**
-    //  * Display the specified resource.
-    //  */
-    // public function show(ReadingPlan $plan)
-    // {
-    //     //
-
-    // }
-
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ReadingPlan $plan)
-    {
+    public function edit(ReadingPlan $plan) {
         $this->authorize('update', $plan);
 
         return View('reading-plans.edit', [
@@ -84,8 +69,7 @@ class ReadingPlanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReadingPlanRequest $request, ReadingPlan $plan)
-    {
+    public function update(UpdateReadingPlanRequest $request, ReadingPlan $plan) {
         $this->authorize('update', $plan);
 
         $validated = $request->validated();
@@ -97,8 +81,7 @@ class ReadingPlanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ReadingPlan $plan)
-    {
+    public function destroy(ReadingPlan $plan) {
         $this->authorize('delete', $plan);
 
         $plan->delete();
@@ -106,8 +89,7 @@ class ReadingPlanController extends Controller
     }
 
 
-    public function complete(ReadingPlan $plan)
-    {
+    public function complete(ReadingPlan $plan) {
         $this->authorize('update', $plan);
 
         $plan->update([

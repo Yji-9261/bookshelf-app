@@ -18,8 +18,7 @@ class IndexGenreTest extends TestCase
     use RefreshDatabase;
 
     /** ゲストが書籍一覧のジャンル管理リンクを押下するとログイン画面にリダイレクトする */
-    public function testGuestCannotViewGenres(): void
-    {
+    public function testGuestCannotViewGenres(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとして書籍一覧画面にアクセス
         // 3. ジャンル管理ボタンのリンク先にアクセス
@@ -41,8 +40,7 @@ class IndexGenreTest extends TestCase
     }
 
     /** 認証ユーザーはページが正常に表示される */
-    public function testGenresView(): void
-    {
+    public function testGenresView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとして書籍一覧画面にアクセス
         // 3. ジャンル管理ボタンのリンク先にアクセス
@@ -70,8 +68,7 @@ class IndexGenreTest extends TestCase
     /**
      * ジャンル名を押すと対象ジャンルの詳細画面に遷移する
      */
-    public function testGenreShowLink(): void
-    {
+    public function testGenreShowLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
         // 3. ジャンル名のリンク先にアクセス
@@ -106,8 +103,7 @@ class IndexGenreTest extends TestCase
     }
 
     /** 「ジャンルを登録」ボタンを押下し、ジャンル登録画面に遷移する */
-    public function testGenreCreateLink(): void
-    {
+    public function testGenreCreateLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
         // 3. ジャンル登録ボタンのリンク先にアクセス
@@ -138,8 +134,7 @@ class IndexGenreTest extends TestCase
     }
 
     /** ジャンルの「編集」ボタンを押下するとジャンル編集画面に遷移する */
-    public function testGenreEditLink(): void
-    {
+    public function testGenreEditLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
         // 3. 編集ボタンのリンク先にアクセス
@@ -172,8 +167,7 @@ class IndexGenreTest extends TestCase
     }
 
     /** 書籍に紐づいていないジャンルの「削除」ボタンを押して、ジャンルを削除できる */
-    public function testDeleteUnusedGenre(): void
-    {
+    public function testDeleteUnusedGenre(): void {
         // 1. ジャンルを生成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
         // 3. 対象ジャンルの削除フォームとボタンを確認し、DELETE送信
@@ -217,8 +211,7 @@ class IndexGenreTest extends TestCase
     }
 
     /** 書籍に紐づいているジャンルの「削除」ボタンを押した場合、ジャンルを削除できない */
-    public function testCannotDeleteUsedGenre(): void
-    {
+    public function testCannotDeleteUsedGenre(): void {
         // 1. seederからテストデータを生成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
         // 3. 書籍に紐づくジャンルの削除フォームを確認し、DELETE送信
@@ -277,8 +270,7 @@ class IndexGenreTest extends TestCase
     /**
      * seederからテストデータ生成
      */
-    private function createTestDataFromSeeder(): void
-    {
+    private function createTestDataFromSeeder(): void {
         // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,

@@ -13,8 +13,7 @@ class RankingTest extends TestCase
     use RefreshDatabase;
 
     /** ゲスト・認証ユーザーはランキングページに遷移する */
-    public function testRankingLink(): void
-    {
+    public function testRankingLink(): void {
         // 1. ゲストとして書籍一覧画面のランキング画面リンクにアクセス
         // 2. テスト: ランキング画面に遷移する
         // 3. テストユーザーを作成する
@@ -52,8 +51,7 @@ class RankingTest extends TestCase
     }
 
     /** ランキングページが正常に表示される */
-    public function testRankingView(): void
-    {
+    public function testRankingView(): void {
         // 1. 書籍とレビュー平均点を把握できるようにテストデータ作成
         // 2. ランキング画面にアクセス
         // 3. テスト: レビューがある10冊のタイトル・著者名・平均評価点・レビュー数が表示されている
@@ -136,8 +134,7 @@ class RankingTest extends TestCase
     }
 
     /** ランキングページが正常に表示される(レビューなし書籍が含まれることがないか) */
-    public function testUnreviewedBooksHidden(): void
-    {
+    public function testUnreviewedBooksHidden(): void {
         // 1. 書籍２冊作成し、片方にレビュー作成
         // 2. ランキング画面にアクセス
         // 3. テスト: レビューがされた書籍１冊のみ表示されているか確認
@@ -175,8 +172,7 @@ class RankingTest extends TestCase
     /**
      * ランキング検証用のテストデータを生成
      */
-    private function createTestData(): void
-    {
+    private function createTestData(): void {
         // ユーザー作成
         $user = User::factory()->create();
 

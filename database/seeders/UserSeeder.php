@@ -10,8 +10,7 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void {
         $users = [
             ['name' => '山田太郎', 'email' => 'yamada@example.com', 'password' => 'password'],
             ['name' => '鈴木花子', 'email' => 'suzuki@example.com', 'password' => 'password'],

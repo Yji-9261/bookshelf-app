@@ -9,8 +9,7 @@ class UpdateReadingPlanRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return true;
     }
 
@@ -19,18 +18,16 @@ class UpdateReadingPlanRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
             'target_date' => ['required', 'date_format:Y-m-d']
         ];
     }
 
-    public function messages()
-    {
+    public function messages() {
         return [
             'target_date.required' => '期日を入力してください',
-            'target_date.date_format' => '出版日をyyyy-mm-dd形式で入力してください',
+            'target_date.date_format' => 'yyyy-mm-dd形式で入力してください',
         ];
     }
 }

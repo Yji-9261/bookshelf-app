@@ -9,8 +9,6 @@ class BookResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
      */
     public function toArray(Request $request): array {
         return [
@@ -30,21 +28,7 @@ class BookResource extends JsonResource
             'reviews_avg_rating' => $this->reviews_avg_rating ?? 0,
 
             'reviews_count' => $this->reviews_count,
-            'reviews' => $this->getReviews($request)
+            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
         ];
-    }
-
-    /**
-     * レビュー表示制御
-     *
-     * @param Request $request
-     * @return mixed|\Illuminate\Http\Resources\MissingValue
-     */
-    private function getReviews(Request $request) {
-        // 一覧表示以外の詳細・登録時に出力
-        return $this->when(
-            !$request->routeIs('books.index'),
-            ReviewResource::collection($this->whenLoaded('reviews'))
-        );
     }
 }

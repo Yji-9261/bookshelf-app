@@ -19,24 +19,21 @@ class Review extends Model
     ];
 
     /**
-     * レビューしたユーザー
-     * @return BelongsTo
+     * このレビューを投稿したユーザー
      */
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * レビューされた書籍
-     * @return BelongsTo
+     * このレビュー対象となる書籍
      */
     public function book(): BelongsTo {
         return $this->belongsTo(Book::class);
     }
 
     /**
-     * レビューに対するいいね
-     * @return BelongsToMany
+     * このレビューに対するいいね
      */
     public function likedByUsers(): BelongsToMany {
         // 外部キーはuser_idとreview_idで規約通りのため省略

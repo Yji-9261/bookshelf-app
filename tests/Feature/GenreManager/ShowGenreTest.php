@@ -2,15 +2,12 @@
 
 namespace Tests\Feature\Genre;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\GenreSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +15,9 @@ class ShowGenreTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** ゲストがジャンル詳細リンクを押下するとログイン画面にリダイレクトする */
+    /**
+     * ゲストがジャンル詳細リンクを押下すると、ログイン画面にリダイレクトする
+     */
     public function testGuestCannotViewGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル詳細画面にアクセス
@@ -34,7 +33,9 @@ class ShowGenreTest extends TestCase
         $this->assertGuest();
     }
 
-    /** 認証ユーザーはページが正常に表示される */
+    /**
+     * 認証ユーザーはページが正常に表示される
+     */
     public function testGenreView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 全ての書籍に「小説」ジャンルを紐つける
@@ -117,7 +118,7 @@ class ShowGenreTest extends TestCase
         $showUrl = route('books.show', $book);
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $links = $xpath->query('//a[@href="' . $showUrl . '"]');
@@ -138,14 +139,10 @@ class ShowGenreTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,
             BookSeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
         ]);
     }
 }

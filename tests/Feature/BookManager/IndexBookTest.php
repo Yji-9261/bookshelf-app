@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\BookManager;
 
-use App\Models\User;
 use App\Models\Book;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\ReviewSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +18,7 @@ class IndexBookTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * ゲスト、認証ユーザー共に'/','/books'にアクセスし、書籍一覧画面が表示されることを確認する
+     * ゲスト、認証ユーザー共に書籍一覧画面にアクセスできる
      */
     public function testBookIndex(): void {
         // 1.ゲストが '/'にアクセスする
@@ -97,41 +97,41 @@ class IndexBookTest extends TestCase
         }
     }
 
-
-
     /**
      * ゲスト、認証ユーザー共に書籍タイトルから詳細画面に遷移できる
      */
     public function testBookShowLink(): void {
-        // 1.ゲストが '/'にアクセスする
-        // 2.書籍詳細画面へのリンクがあることを確認し、リンク先にアクセス
-        // 3.テスト: 意図した画面('books.show')が表示される
-        // 4.認証ユーザーが '/'にアクセスする
-        // 5.書籍詳細画面へのリンクがあることを確認し、リンク先にアクセス
-        // 6.テスト: 意図した画面('books.show')が表示される
+        // 1. テスト用の書籍を作成する
+        // 2. ゲストが '/'にアクセスする
+        // 3. 書籍詳細画面へのリンクがあることを確認し、リンク先にアクセス
+        // 4. テスト: 意図した画面('books.show')が表示される
+        // 5. 認証ユーザーが '/'にアクセスする
+        // 6. 書籍詳細画面へのリンクがあることを確認し、リンク先にアクセス
+        // 7. テスト: 意図した画面('books.show')が表示される
 
-        $this->createTestDataFromSeeder();
-        $book = Book::firstOrFail();
+        // 1
+        $user = User::factory()->create();
+        $book = Book::factory()->create();
         $showUrl = route('books.show', $book);
 
-        // 1,2
+        // 2,3
         $this->get('/')
             ->assertOk()
             ->assertSee('href="' . $showUrl . '"', false);
 
-        // 3
+        // 4
         $this->get($showUrl)
             ->assertOk()
             ->assertViewIs('books.show')
             ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book));
 
-        // 4,5
-        $this->actingAs(User::firstOrFail());
+        // 5,6
+        $this->actingAs($user);
         $this->get('/')
             ->assertOk()
             ->assertSee('href="' . $showUrl . '"', false);
 
-        // 6
+        // 7
         $this->get($showUrl)
             ->assertOk()
             ->assertViewIs('books.show')
@@ -184,7 +184,6 @@ class IndexBookTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,

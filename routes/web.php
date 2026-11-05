@@ -1,16 +1,15 @@
 <?php
 
-use GuzzleHttp\Middleware;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
-use App\Http\Controllers\GenreController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\GenreController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\ReadingPlanController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReviewLikeController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,9 +23,7 @@ use App\Http\Controllers\ReviewLikeController;
 */
 
 /** 書籍 */
-Route::get('/', [BookController::class, 'index'])
-    ->name('books.index');
-
+Route::get('/', [BookController::class, 'index']);
 Route::get('/books', [BookController::class, 'index'])
     ->name('books.index');
 
@@ -50,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/books/{book}', [BookController::class, 'destroy'])
         ->name('books.destroy');
+
+    // isbn検索、取得
+    Route::get('/books/isbn/{isbn}', [BookController::class, 'getBookInformation']);
 });
 
 /** レビュー */
@@ -110,7 +110,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('genres.destroy');
 });
 
-
 /** レポート */
 Route::middleware(['auth'])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])
@@ -132,30 +131,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/reading-plans/{plan}/complete', [ReadingPlanController::class, 'complete'])
         ->name('reading-plans.complete');
 
-    // 編集画面表示
     Route::get('/reading-plans/{plan}/edit', [ReadingPlanController::class, 'edit'])
         ->name('reading-plans.edit');
 
-    // 編集
     Route::put('/reading-plans/{plan}', [ReadingPlanController::class, 'update'])
         ->name('reading-plans.update');
 
-    // 削除
     Route::delete('/reading-plans/{plan}', [ReadingPlanController::class, 'destroy'])
         ->name('reading-plans.destroy');
 });
-
 
 /** 通知 */
 Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])
         ->name('notifications.index');
 
+    // 既読にする
     Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'update'])
         ->name('notifications.read');
-});
-
-/** isbn検索 */
-Route::middleware(['auth'])->group(function () {
-    Route::get('/books/isbn/{isbn}', [BookController::class, 'getBookInformation']);
 });

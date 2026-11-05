@@ -16,8 +16,6 @@ class StoreUpdateGenreRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
@@ -26,15 +24,21 @@ class StoreUpdateGenreRequest extends FormRequest
                 'string',
                 // 新規登録・更新共通のカスタムリクエスト
                 // 新規登録時のroute('genre')はnullのためignore部分は処理されない
-                Rule::unique('genres', 'name')->ignore($this->route('genre'))
-            ]
+                Rule::unique('genres', 'name')->ignore($this->route('genre')),
+                'max:255',
+            ],
         ];
     }
 
-    public function messages() {
+    /**
+     * バリデーションメッセージ
+     */
+    public function messages(): array {
         return [
             'name.required' => 'ジャンルを入力してください',
             'name.unique' => 'このジャンルはすでに登録されています',
+            'name.string' => 'ジャンルは文字列で入力してください',
+            'name.max' => 'ジャンルを255文字以内で入力してください',
         ];
     }
 }

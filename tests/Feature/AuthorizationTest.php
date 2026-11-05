@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,7 +13,7 @@ class AuthorizationTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * 認証ユーザーが登録していない書籍の編集画面にアクセスする
+     * 本人が登録していない書籍の編集画面にアクセスすると、拒否される
      */
     public function testCannotEditOthersBook(): void {
         // 1. GET /books/{book}/edit パスパラメータに認証ユーザー以外が登録した書籍を指定する
@@ -33,7 +33,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * 認証ユーザーが投稿していないレビューの編集画面にアクセスする
+     * 本人が投稿していないレビューの編集画面にアクセスすると、拒否される
      */
     public function testCannotEditOthersReview(): void {
         // 1. GET /reviews/{review}/editのパスパラメータに認証ユーザー以外が投稿したレビューを指定する
@@ -46,7 +46,7 @@ class AuthorizationTest extends TestCase
         $review = $book->reviews()->create([
             'user_id' => $createdUser->id,
             'rating' => 1,
-            'comment' => 'テスト'
+            'comment' => 'テスト',
         ]);
 
         // 2
@@ -58,7 +58,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * 本人が登録していない書籍の「更新」を実行する
+     * 本人が登録していない書籍の「更新」を実行すると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotUpdateOthersBook(): void {
@@ -81,7 +81,7 @@ class AuthorizationTest extends TestCase
                 'published_date' => '2026-01-01',
                 'image_url' => 'https://example.com/updated.jpg',
                 'description' => '更新後の書籍説明です。',
-                'genres' => $book->genres()->get()->map(fn ($genre) => $genre->id)->toArray()
+                'genres' => $book->genres()->get()->map(fn ($genre) => $genre->id)->toArray(),
             ])
             ->assertStatus(403);
 
@@ -90,7 +90,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * 本人が登録していない書籍の「削除」を実行する
+     * 本人が登録していない書籍の「削除」を実行すると拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotDeleteOthersBook(): void {
@@ -114,7 +114,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * 本人が登録していないレビューの「更新」を実行する
+     * 本人が登録していないレビューの「更新」を実行すると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotUpdateOthersReview(): void {
@@ -128,7 +128,7 @@ class AuthorizationTest extends TestCase
         $review = $book->reviews()->create([
             'user_id' => $createdUser->id,
             'rating' => 1,
-            'comment' => 'テスト'
+            'comment' => 'テスト',
         ]);
         $original = $review->refresh()->getAttributes();
 
@@ -137,7 +137,7 @@ class AuthorizationTest extends TestCase
         $this->actingAs($loginUser)
             ->put("/reviews/{$review->id}", [
                 'rating' => 5,
-                'comment' => '更新後のテスト'
+                'comment' => '更新後のテスト',
             ])
             ->assertStatus(403);
 
@@ -146,7 +146,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * 本人が登録していないレビューの「削除」を実行する
+     * 本人が登録していないレビューの「削除」を実行すると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotDeleteOthersReview(): void {
@@ -160,7 +160,7 @@ class AuthorizationTest extends TestCase
         $review = $book->reviews()->create([
             'user_id' => $createdUser->id,
             'rating' => 1,
-            'comment' => 'テスト'
+            'comment' => 'テスト',
         ]);
         $original = $review->refresh()->getAttributes();
 
@@ -175,7 +175,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * ゲストが書籍の「新規登録」をする
+     * ゲストが書籍の「新規登録」をすると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotCreateBookByGuest(): void {
@@ -186,7 +186,7 @@ class AuthorizationTest extends TestCase
         $this->assertDatabaseEmpty('books');
 
         // 2 auth middlewareにてloginリダイレクト
-        $this->post("/books/create", [
+        $this->post('/books/create', [
             'title' => 'テスト',
             'author' => 'テスト',
             'isbn' => '9780000000000',
@@ -199,7 +199,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * ゲストがレビューの「新規登録」をする
+     * ゲストがレビューの「新規登録」をすると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotCreateReviewByGuest(): void {
@@ -224,7 +224,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * ゲストがジャンルの「新規登録」をする
+     * ゲストがジャンルの「新規登録」をすると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotCreateGenreByGuest(): void {
@@ -235,7 +235,7 @@ class AuthorizationTest extends TestCase
         $this->assertDatabaseEmpty('genres');
 
         // 2 auth middlewareにてloginリダイレクト
-        $this->post("/genres", [
+        $this->post('/genres', [
             'name' => 'テスト',
         ])->assertRedirect('/login');
 
@@ -244,7 +244,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * ゲストがいいねの「登録」をする
+     * ゲストがいいねの「登録」をすると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotCreateReviewLikesByGuest(): void {
@@ -259,7 +259,7 @@ class AuthorizationTest extends TestCase
         $review = $book->reviews()->create([
             'user_id' => $createdUser->id,
             'rating' => 1,
-            'comment' => 'テスト'
+            'comment' => 'テスト',
         ]);
 
         $this->assertDatabaseEmpty('review_likes');
@@ -270,7 +270,7 @@ class AuthorizationTest extends TestCase
     }
 
     /**
-     * ゲストがお気に入りの「登録」をする
+     * ゲストがお気に入りの「登録」をすると、拒否される
      * この処理はブラウザ上ではできないようになっているため、外部からリクエストされた体で行う
      */
     public function testCannotCreateFavoriteByGuest(): void {

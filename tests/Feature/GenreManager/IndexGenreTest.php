@@ -2,14 +2,11 @@
 
 namespace Tests\Feature\Genre;
 
-use App\Models\User;
 use App\Models\Genre;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\GenreSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,7 +14,9 @@ class IndexGenreTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** ゲストが書籍一覧のジャンル管理リンクを押下するとログイン画面にリダイレクトする */
+    /**
+     * ゲストがジャンル管理リンクを押下すると、ログイン画面にリダイレクトする
+     */
     public function testGuestCannotViewGenres(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとして書籍一覧画面にアクセス
@@ -39,7 +38,9 @@ class IndexGenreTest extends TestCase
         $this->assertGuest();
     }
 
-    /** 認証ユーザーはページが正常に表示される */
+    /**
+     * 認証ユーザーはページが正常に表示される
+     */
     public function testGenresView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとして書籍一覧画面にアクセス
@@ -87,7 +88,7 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $links = $xpath->query('//a[@href="' . $showUrl . '"]');
@@ -102,7 +103,9 @@ class IndexGenreTest extends TestCase
             ->assertSeeText($genre->name);
     }
 
-    /** 「ジャンルを登録」ボタンを押下し、ジャンル登録画面に遷移する */
+    /**
+     * 認証ユーザーは「ジャンルを登録」ボタンを押下すると、ジャンル登録画面に遷移する
+     */
     public function testGenreCreateLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
@@ -120,7 +123,7 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $links = $xpath->query('//a[@href="' . $createUrl . '"]');
@@ -133,7 +136,9 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.create');
     }
 
-    /** ジャンルの「編集」ボタンを押下するとジャンル編集画面に遷移する */
+    /**
+     * 認証ユーザーはジャンルの「編集」ボタンを押下すると、ジャンル編集画面に遷移する
+     */
     public function testGenreEditLink(): void {
         // 1. seederからテストデータ作成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
@@ -152,7 +157,7 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $links = $xpath->query('//a[@href="' . $editUrl . '"]');
@@ -166,7 +171,9 @@ class IndexGenreTest extends TestCase
             ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre));
     }
 
-    /** 書籍に紐づいていないジャンルの「削除」ボタンを押して、ジャンルを削除できる */
+    /**
+     * 書籍に一つも紐づいていないジャンルの「削除」ボタンを押下すると、ジャンルを削除できる
+     */
     public function testDeleteUnusedGenre(): void {
         // 1. ジャンルを生成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
@@ -186,7 +193,7 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . $deleteUrl . '"]');
@@ -210,7 +217,9 @@ class IndexGenreTest extends TestCase
             ->assertDontSeeText($genre->name);
     }
 
-    /** 書籍に紐づいているジャンルの「削除」ボタンを押した場合、ジャンルを削除できない */
+    /**
+     * 書籍に紐づいているジャンルの「削除」ボタンを押下しても、ジャンルを削除できない
+     */
     public function testCannotDeleteUsedGenre(): void {
         // 1. seederからテストデータを生成
         // 2. 認証ユーザーとしてジャンル一覧画面にアクセス
@@ -236,7 +245,7 @@ class IndexGenreTest extends TestCase
             ->assertViewIs('genres.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . $deleteUrl . '"]');
@@ -271,14 +280,10 @@ class IndexGenreTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,
             BookSeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
         ]);
     }
 }

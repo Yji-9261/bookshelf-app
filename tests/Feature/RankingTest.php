@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,7 +12,9 @@ class RankingTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** ゲスト・認証ユーザーはランキングページに遷移する */
+    /**
+     * ゲスト・認証ユーザーはランキングページにアクセスできる
+     */
     public function testRankingLink(): void {
         // 1. ゲストとして書籍一覧画面のランキング画面リンクにアクセス
         // 2. テスト: ランキング画面に遷移する
@@ -50,7 +52,9 @@ class RankingTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    /** ランキングページが正常に表示される */
+    /**
+     * ランキングページが正常に表示される
+     */
     public function testRankingView(): void {
         // 1. 書籍とレビュー平均点を把握できるようにテストデータ作成
         // 2. ランキング画面にアクセス
@@ -85,7 +89,7 @@ class RankingTest extends TestCase
         // 10件の書籍データが渡されているか検証
         $this->assertCount(10, $rankedBooks);
 
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $cards = $xpath->query('//a[.//h3]');
@@ -99,8 +103,9 @@ class RankingTest extends TestCase
             $links = $xpath->query('//a[@href="' . $showUrl . '"]');
 
             // top10に入らなかった書籍が混じっていないか検証
-            if (!$topIndexes->contains($index)) {
+            if (! $topIndexes->contains($index)) {
                 $this->assertCount(0, $links);
+
                 continue;
             }
             $this->assertCount(1, $links);
@@ -133,7 +138,9 @@ class RankingTest extends TestCase
         }
     }
 
-    /** ランキングページが正常に表示される(レビューなし書籍が含まれることがないか) */
+    /**
+     * レビューなし書籍が含まれることがない
+     */
     public function testUnreviewedBooksHidden(): void {
         // 1. 書籍２冊作成し、片方にレビュー作成
         // 2. ランキング画面にアクセス
@@ -186,7 +193,7 @@ class RankingTest extends TestCase
         });
 
         // 書籍11冊に対して、定数の配列と同じ順番でレビュー作成
-        $books->each(function ($book, $index) use ($user) {
+        $books->each(function ($book, $index) {
             foreach (self::INITIAL_RATINGS[$index] as $rating) {
                 $book->reviews()->create([
                     'user_id' => User::factory()->create()->id,
@@ -200,7 +207,7 @@ class RankingTest extends TestCase
     /**
      * 書籍に対するレビュー評価初期値テーブル。検証用にも用いられる。
      */
-    public const INITIAL_RATINGS = [
+    private const INITIAL_RATINGS = [
         // 書籍1 レビュー数1 平均レビュー2.0
         [2],
         // 書籍2 レビュー数2 平均レビュー3.0

@@ -2,14 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Book;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\GenreSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,7 +15,9 @@ class FavoriteTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** ゲストが書籍一覧のお気に入りリンクを押下するとログイン画面にリダイレクトする */
+    /**
+     * ゲストが書籍一覧のお気に入りリンクを押下すると、ログイン画面にリダイレクトする
+     */
     public function testGuestCannotViewFavorites(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとして書籍一覧画面にアクセス
@@ -39,7 +39,9 @@ class FavoriteTest extends TestCase
         $this->assertGuest();
     }
 
-    /** 認証ユーザーはページが正常に表示される */
+    /**
+     * 認証ユーザーはページが正常に表示される
+     */
     public function testFavoritesView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとして書籍一覧画面にアクセス
@@ -66,7 +68,7 @@ class FavoriteTest extends TestCase
     }
 
     /**
-     * お気に入り一覧画面でお気に入り登録した書籍一覧がページネーションされ表示されている
+     * お気に入り一覧画面でお気に入り登録した書籍一覧が、ページネーションされ表示されている
      */
     public function testFavoritesPagination(): void {
         // 1. 11件をお気に入り登録したユーザーを作成する
@@ -129,7 +131,9 @@ class FavoriteTest extends TestCase
         }
     }
 
-    /** 書籍タイトルを押すと対象書籍の詳細画面に遷移する */
+    /**
+     * 書籍タイトルを押すと対象書籍の詳細画面に遷移する
+     */
     public function testBookShowLink(): void {
         // 1. 1件以上お気に入り登録したユーザーを作成する
         // 2. 1で作成したユーザーとして認証し、お気に入り一覧画面アクセス
@@ -149,7 +153,7 @@ class FavoriteTest extends TestCase
             ->assertViewIs('favorites.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $links = $xpath->query('//h3/a[@href="' . $showUrl . '"]');
@@ -166,18 +170,13 @@ class FavoriteTest extends TestCase
 
     /**
      * seederからテストデータ生成
-     *
-     * @return void
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,
             BookSeeder::class,
-            ReviewSeeder::class,
             FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
         ]);
     }
 }

@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ReadingPlanStatus;
 use App\Models\Book;
 use App\Models\User;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReadingPlanSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Enums\ReadingPlanStatus;
 use Tests\TestCase;
 
 class ReadingPlanTest extends TestCase
@@ -26,8 +26,7 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * Summary of testIndexView
-     * @return void
+     * 読書計画一覧画面が正常に表示される
      */
     public function testIndexView(): void {
         // 1. シーダーからテスト用データ作成
@@ -38,27 +37,28 @@ class ReadingPlanTest extends TestCase
         $user = User::findOrFail(1);
 
         // DB 登録順に想定通りの表示となっているか
-        $comparedStrings = $user->readingPlans->map(function ($plan) {
-            $comparedStrings = [
-                // 書籍
-                $plan->book->title,
-                // 期日
-                $plan->target_date->toDateString(),
-                // 完了日
-                $plan->completed_at?->toDateString() ?? '-',
-                // 状態
-                $plan->status->label(),
-            ];
+        $comparedStrings = $user->readingPlans
+            ->map(function ($plan) {
+                $comparedStrings = [
+                    // 書籍
+                    $plan->book->title,
+                    // 期日
+                    $plan->target_date->toDateString(),
+                    // 完了日
+                    $plan->completed_at?->toDateString() ?? '-',
+                    // 状態
+                    $plan->status === ReadingPlanStatus::InProgress ? '読書中' : '読了',
+                ];
 
-            // 読書中状態なら「読了する」と「編集」が表示される想定
-            if ($plan->status === ReadingPlanStatus::InProgress) {
-                $comparedStrings[] = '読了する';
-                $comparedStrings[] = '編集';
-            }
-            $comparedStrings[] = '削除';
+                // 読書中状態なら「読了する」と「編集」が表示される想定
+                if ($plan->status === ReadingPlanStatus::InProgress) {
+                    $comparedStrings[] = '読了する';
+                    $comparedStrings[] = '編集';
+                }
+                $comparedStrings[] = '削除';
 
-            return $comparedStrings;
-        })
+                return $comparedStrings;
+            })
             ->flatten()
             ->toArray();
 
@@ -70,7 +70,7 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 状態フィルタリング可能
+     * 読書計画状態フィルタを実行した時に、期待通りの結果を返す
      */
     public function testStatusFiltering(): void {
         // 1. seederでテストデータを作成
@@ -120,23 +120,33 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 新規計画作成ボタンクリック
+     * 新規計画作成ボタンクリックすると読書計画登録画面に遷移する
      */
     public function testClickRegister(): void {
+        // 1. seederからテストデータを作成
+        // 2. 認証ユーザーとして読書計画作成画面にアクセス
+        // 3. テスト: 読書計画作成画面に遷移する
+        // 4. テスト: 登録済みの書籍（著者名）が一覧で表示されている
+
+        // 1
         $this->createTestDatasFromSeeder();
 
+        // 検証データ
         $titles = Book::all()->map(function ($book) {
             return $book->title . "（{$book->author}）";
         })->toArray();
 
-        $user = User::factory()->create();
-        $this->actingAs($user)->get('/reading-plans/create')
+        // 2,3,4
+        $this->actingAs(User::factory()->create())
+            ->get('/reading-plans/create')
             ->assertOk()
             ->assertViewIs('reading-plans.create')
             ->assertSeeInOrder($titles);
     }
 
-    /** 正常な入力で新規計画登録できる */
+    /**
+     * 正常な入力で新規計画登録できる
+     */
     public function testRegisterSuccess(): void {
         // 1. テストデータをseederから作成
         // 2. 新規ユーザー作成
@@ -157,7 +167,7 @@ class ReadingPlanTest extends TestCase
         $this->actingAs($user)->from('/reading-plans')
             ->post('/reading-plans/create', [
                 'book_id' => 1,
-                'target_date' => '2026-01-01'
+                'target_date' => '2026-01-01',
             ]);
 
         // 5
@@ -167,7 +177,9 @@ class ReadingPlanTest extends TestCase
         $this->assertSame('2026-01-01', $readingPlans->target_date->toDateString());
     }
 
-    /** 読書計画編集画面で不正な入力を行い、更新失敗のメッセージが表示される */
+    /**
+     * 読書計画登録画面で不正な入力を行い登録を実行すると、登録に失敗する
+     */
     public function testReadingPlanCreateInvalid(): void {
         // 1. テストデータをseederから作成
         // 2. 新規ユーザー作成
@@ -179,7 +191,7 @@ class ReadingPlanTest extends TestCase
         // 1
         $this->createTestDatasFromSeeder();
         $user = User::factory()->create();
-        $createUrl = "/reading-plans/create";
+        $createUrl = '/reading-plans/create';
 
         // 作成前のDB個数検証
         $this->assertSame(0, $user->readingPlans()->count());
@@ -194,7 +206,7 @@ class ReadingPlanTest extends TestCase
             'POST',
             [
                 'book_id' => null,
-                'target_date' => null
+                'target_date' => null,
             ],
             [
                 'book_id' => '書籍を入力してください',
@@ -207,14 +219,14 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 編集ボタンクリック
+     * 編集ボタンクリックすると、対象の読書計画内容が反映されたページが表示される
      */
     public function testClickEdit(): void {
         // テスト用
         $this->createTestDatasFromSeeder();
         $user = User::findOrFail(1);
         $readingPlan = $user->readingPlans()->findOrFail(1);
-        $editUrl = "/reading-plans/1/edit";
+        $editUrl = '/reading-plans/1/edit';
 
         // 編集するボタンのリンク先が存在する
         $this->actingAs($user)->get('/reading-plans')
@@ -229,11 +241,13 @@ class ReadingPlanTest extends TestCase
             ->assertSeeInOrder([
                 $readingPlan->book->title,
                 $readingPlan->status->label(),
-                $readingPlan->target_date->toDateString()
+                $readingPlan->target_date->toDateString(),
             ]);
     }
 
-    /** 読書計画編集画面で正常な入力を行い更新に成功する */
+    /**
+     * 読書計画編集画面で正常な入力を行い更新を実行すると、更新に成功する
+     */
     public function testReadingPlanUpdateSuccess(): void {
         // 1. テスト用読書計画を作成{'target_date': '2026-01-01'}
         // 2. 読書計画作成者が認証ユーザーとする
@@ -261,7 +275,9 @@ class ReadingPlanTest extends TestCase
         $this->assertSame('2026-01-02', $readingPlan->fresh()->target_date->toDateString());
     }
 
-    /** 読書計画編集画面で不正な入力を行い、更新失敗のメッセージが表示される */
+    /**
+     * 読書計画編集画面で不正な入力を行い更新を実行すると、更新に失敗する
+     */
     public function testReadingPlanUpdateInvalid(): void {
         // 1. テスト用読書計画を作成{'target_date': '2026-01-01'}
         // 2. 読書計画作成者が認証ユーザーとする
@@ -296,7 +312,7 @@ class ReadingPlanTest extends TestCase
             $updateUrl,
             'PUT',
             [
-                'target_date' => null
+                'target_date' => null,
             ],
             [
                 'target_date' => '期日を入力してください',
@@ -311,10 +327,10 @@ class ReadingPlanTest extends TestCase
             $updateUrl,
             'PUT',
             [
-                'target_date' => '-01-01'
+                'target_date' => '-01-01',
             ],
             [
-                'target_date' => 'yyyy-mm-dd形式で入力してください',
+                'target_date' => '期日をyyyy-mm-dd形式で入力してください',
             ],
         );
 
@@ -323,7 +339,7 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 読了ボタンクリック
+     * 読了ボタンクリックすると、読書計画が読了状態になる
      */
     public function testClickComplete(): void {
         // 1. seederからテストデータ作成
@@ -364,7 +380,7 @@ class ReadingPlanTest extends TestCase
     }
 
     /**
-     * 削除ボタンクリック
+     * 削除ボタンクリックすると、読書計画が削除される
      */
     public function testClickDelete(): void {
         // 1. seederからテストデータ作成
@@ -414,8 +430,16 @@ class ReadingPlanTest extends TestCase
         ]);
     }
 
-    /** 不正入力時のメッセージとリダイレクト先を検証 */
-    private function checkInvalidState(string $from, string $next, string $action, array $input, array $errors) {
+    /**
+     * 不正入力時のメッセージとリダイレクト先を検証
+     *
+     * @param  string  $from  遷移元URL
+     * @param  string  $next  送信先URL
+     * @param  string  $action  'POST' or 'PUT'
+     * @param  array  $input  リクエスト入力内容
+     * @param  array  $errors  期待されるエラー表示先名称と、エラーメッセージ
+     */
+    private function checkInvalidState(string $from, string $next, string $action, array $input, array $errors): void {
         if ($action === 'PUT') {
             $this->from($from)->put($next, $input)
                 ->assertRedirect($from)

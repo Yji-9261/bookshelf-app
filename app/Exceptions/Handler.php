@@ -2,8 +2,8 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -30,6 +30,7 @@ class Handler extends ExceptionHandler
     }
 
     public function render($request, Throwable $e) {
+        // API実行時、対象となるリソースIDが見つからなかった場合のエラーレスポンス定義
         if ($e instanceof ModelNotFoundException) {
             if ($request->is('api/*')) {
                 return response()->json([
@@ -37,6 +38,8 @@ class Handler extends ExceptionHandler
                 ], 404);
             }
         }
+
+        // API実行時、非認可アクション時のエラーレスポンス定義
         if ($e instanceof AuthorizationException) {
             if ($request->is('api/*')) {
                 return response()->json([

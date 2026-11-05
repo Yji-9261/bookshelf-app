@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use App\Models\User;
 use App\Models\Genre;
-use Tests\TestCase;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class GenreTest extends TestCase
 {
@@ -14,7 +14,7 @@ class GenreTest extends TestCase
     /**
      * booksのリレーションが適切か
      */
-    public function test_books(): void {
+    public function testBooks(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -33,7 +33,6 @@ class GenreTest extends TestCase
          *    $genre->books()->whereKey($book->id)->exists()がfalse
          *    book_genreテーブルに'book_id' => $book->id, 'genre_id' => $genre->idの行が存在しない
          */
-
         $user = User::create([
             'name' => 'user1',
             'email' => 'user1@example.com',

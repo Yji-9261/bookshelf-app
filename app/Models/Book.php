@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
@@ -23,28 +23,25 @@ class Book extends Model
     ];
 
     protected $casts = [
-        'published_date' => 'datetime',
+        'published_date' => 'date',
     ];
 
     /**
-     * 登録したユーザー
-     * @return BelongsTo
+     * この書籍を登録したユーザー
      */
     public function registerUser(): BelongsTo {
         return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
-     * 投稿されたレビュー
-     * @return HasMany
+     * この書籍に投稿されたレビュー
      */
     public function reviews(): HasMany {
         return $this->hasMany(Review::class);
     }
 
     /**
-     * 紐ついているジャンル
-     * @return BelongsToMany
+     * この書籍に紐ついているジャンル
      */
     public function genres(): BelongsToMany {
         // 中間テーブル名(book_genre)、外部キーは規約通りのため省略
@@ -52,8 +49,7 @@ class Book extends Model
     }
 
     /**
-     * お気に入り
-     * @return BelongsToMany
+     * この書籍をお気に入り登録したユーザー
      */
     public function favoriteUsers(): BelongsToMany {
         // 外部キーは規約通り名称のため省略
@@ -61,8 +57,7 @@ class Book extends Model
     }
 
     /**
-     * 読書計画
-     * @return HasMany
+     * この書籍を対象とする読書計画
      */
     public function readingPlans(): HasMany {
         return $this->hasMany(ReadingPlan::class);

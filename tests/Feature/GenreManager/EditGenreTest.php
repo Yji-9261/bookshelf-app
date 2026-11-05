@@ -2,15 +2,13 @@
 
 namespace Tests\Feature\Genre;
 
-use App\Models\User;
 use App\Models\Genre;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\GenreSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class EditGenreTest extends TestCase
@@ -19,33 +17,45 @@ class EditGenreTest extends TestCase
 
     public const NAME = 'テスト';
 
+    /**
+     * 引数に与えられた内容でジャンル更新urlにPUT送信
+     *
+     * @param  Genre  $genre  更新対象のジャンルモデル
+     * @param  mixed  $name  変更先のジャンル名
+     */
     private function putUpdateGenre(
         Genre $genre,
-        $name = self::NAME
-    ) {
+        mixed $name = self::NAME
+    ): TestResponse {
         return $this->actingAs(User::findOrFail(1))
             ->put(route('genres.update', $genre), [
                 'name' => $name,
             ]);
     }
 
-
-    /** ゲストがジャンル編集リンクを押下するとログイン画面にリダイレクトする */
+    /**
+     * ゲストがジャンル編集リンクを押下するとログイン画面にリダイレクトする
+     */
     public function testGuestCannotEditGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル編集画面にアクセス
         // 3. テスト: ログイン画面にリダイレクトする
 
+        // 1
         $this->createTestDataFromSeeder();
         $genre = Genre::firstOrFail();
 
+        // 2
         $this->get(route('genres.edit', $genre))
             ->assertRedirect(route('login'));
 
+        // 3
         $this->assertGuest();
     }
 
-    /** 認証ユーザーはページが正常に表示される */
+    /**
+     * 認証ユーザーはページが正常に表示される
+     */
     public function testGenreEditView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとしてジャンル編集画面にアクセス
@@ -63,7 +73,7 @@ class EditGenreTest extends TestCase
             ->assertViewHas('genre', fn (Genre $shownGenre) => $shownGenre->is($genre));
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . route('genres.update', $genre) . '"]');
@@ -77,7 +87,7 @@ class EditGenreTest extends TestCase
     }
 
     /**
-     * 正常な入力をして「更新」ボタンを押下する
+     * 正常な入力をして「更新」ボタンを押下すると、更新に成功する
      */
     public function testUpdateGenre(): void {
         // 1. seederからテストデータ作成
@@ -106,7 +116,9 @@ class EditGenreTest extends TestCase
         $this->assertSame($bookIds, $genre->books()->orderBy('books.id')->pluck('books.id')->all());
     }
 
-    /** 不正な入力をして「更新」ボタンを押下する */
+    /**
+     * nameフィールドを不正なリクエストでPUT送信したとき、更新に失敗する
+     */
     public function testNameValidation(): void {
         // 1. seederからテストデータ作成
         // 2. $genre = Genre::where('name','旅行')->firstOrFail();
@@ -130,6 +142,7 @@ class EditGenreTest extends TestCase
         $cases = [
             ['', 'ジャンルを入力してください'],
             ['小説', 'このジャンルはすでに登録されています'],
+            [str_repeat('あ', 256), 'ジャンルを255文字以内で入力してください'],
         ];
 
         // 3~8
@@ -152,14 +165,10 @@ class EditGenreTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,
             BookSeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ReviewLikeController extends Controller
@@ -10,7 +11,7 @@ class ReviewLikeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Review $review) {
+    public function store(Request $request, Review $review): RedirectResponse {
         $user = $review->likedByUsers()->find($request->user()->id);
         if ($user) {
             // いいね済みなら解除
@@ -19,6 +20,7 @@ class ReviewLikeController extends Controller
             // いいね未登録なら登録
             $review->likedByUsers()->syncWithoutDetaching($request->user()->id);
         }
+
         return redirect(route('books.show', ['book' => $review->book]));
     }
 }

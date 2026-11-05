@@ -17,13 +17,10 @@ class IndexReadingPlanRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
-            //'currentStatus' => ['sometime', 'nullable', 'string', Rule::enum(ReadingPlanStatus::class)]
-            'status' => ['sometimes', 'nullable', 'string']
+            'status' => ['sometimes', 'nullable', Rule::enum(ReadingPlanStatus::class)],
         ];
     }
 }

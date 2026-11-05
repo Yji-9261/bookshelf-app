@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReadingPlanStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,7 +17,7 @@ class ReadingPlan extends Model
         'user_id',
         'target_date',
         'status',
-        'completed_at'
+        'completed_at',
     ];
 
     protected $casts = [
@@ -26,16 +27,21 @@ class ReadingPlan extends Model
     ];
 
     /**
-     * 読書計画ユーザー
-     * @return BelongsTo
+     * アクティブな読書計画レコードを取得する
+     */
+    public function scopeActive(Builder $query): Builder {
+        return $query->whereNull('completed_at');
+    }
+
+    /**
+     * この読書計画を持つユーザー
      */
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * 読書計画書籍
-     * @return BelongsTo
+     * この読書計画に紐つく書籍
      */
     public function book(): BelongsTo {
         return $this->belongsTo(Book::class);

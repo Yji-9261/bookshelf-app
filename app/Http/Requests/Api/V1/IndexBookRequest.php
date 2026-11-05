@@ -15,23 +15,25 @@ class IndexBookRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
-            'keyword' => ['sometimes', 'string', 'max:255'],
-            'genre' => ['sometimes', 'string', 'exists:genres,name'],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'keyword' => ['nullable', 'sometimes', 'string', 'max:255'],
+            'genre' => ['nullable', 'sometimes', 'string', 'exists:genres,name'],
+            'page' => ['nullable', 'sometimes', 'integer', 'min:1'],
+            'per_page' => ['nullable', 'sometimes', 'integer', 'min:1', 'max:100'],
         ];
     }
 
-    public function messages() {
+    /**
+     * バリデーションメッセージ
+     */
+    public function messages(): array {
         return [
             'keyword.string' => 'キーワードは文字列で入力して下さい',
             'keyword.max' => 'キーワードを255文字以内で入力してください',
 
+            'genre.string' => 'ジャンルは文字列で入力して下さい',
             'genre.exists' => 'ジャンルが存在しません',
 
             'page.integer' => '数値を入力してください',

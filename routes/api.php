@@ -1,9 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthenticationController;
 use App\Http\Controllers\Api\V1\BookController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,16 +15,9 @@ use App\Http\Controllers\Api\V1\BookController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthenticationController::class, 'login']);
-
-    // レスポンスにて出力を制限するためにルート名称を定義する
-    Route::get('/books', [BookController::class, 'index'])->name('books.index');
-
+    Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/{book}', [BookController::class, 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {

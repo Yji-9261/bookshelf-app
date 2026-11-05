@@ -16,8 +16,6 @@ class StoreUpdateBookRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
@@ -25,14 +23,13 @@ class StoreUpdateBookRequest extends FormRequest
             'author' => ['required', 'string', 'max:255'],
             'isbn' => [
                 'required',
-                'string',
                 'digits:13',
                 // 新規登録・更新共通のカスタムリクエスト
                 // 新規登録時のroute('book')はnullのためignore部分は処理されない
-                Rule::unique('books', 'isbn')->ignore($this->route('book'))
+                Rule::unique('books', 'isbn')->ignore($this->route('book')),
             ],
             'published_date' => ['nullable', 'date_format:Y-m-d'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:10000'],
             'genres' => ['required', 'array'],
             'genres.*' => ['string', 'exists:genres,name'],
             'image_url' => ['nullable', 'url', 'max:2048'],
@@ -40,26 +37,28 @@ class StoreUpdateBookRequest extends FormRequest
     }
 
     /**
-     * バリデーションエラー時メッセージ
-     *
-     * @return array
+     * バリデーションメッセージ
      */
     public function messages(): array {
         return [
             'title.required' => '書籍のタイトルを入力してください',
+            'title.string' => '書籍のタイトルは文字列で入力してください',
             'title.max' => '書籍のタイトルを255文字以内で入力してください',
 
             'author.required' => '著者名を入力してください',
+            'author.string' => '著者名は文字列で入力してください',
             'author.max' => '著者名を255文字以内で入力してください',
 
             'isbn.required' => 'ISBNを入力してください',
             'isbn.digits' => 'ISBNを13桁の数字で入力してください（ハイフン不要）',
             'isbn.unique' => 'このISBNは登録済みです',
 
-            'published_date.required' => '出版日を入力してください',
             'published_date.date_format' => '出版日をyyyy-mm-dd形式で入力してください',
 
-            'genres.required' => 'ジャンルを選択してください',
+            'description.max' => '説明は10000文字以内で入力してください',
+
+            'genres.required' => 'genresを入力してください',
+            'genres.array' => 'genresは配列形式で入力してください',
 
             'genres.*.string' => 'ジャンルは文字列で入力してください',
             'genres.*.exists' => '登録済みのジャンルを入力して下さい',

@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -20,11 +21,10 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
-            User::firstOrCreate([
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'password' => $user['password'],
-            ]);
+            User::firstOrCreate(
+                ['email' => $user['email']],
+                ['name' => $user['name'], 'password' => Hash::make($user['password'])],
+            );
         }
     }
 }

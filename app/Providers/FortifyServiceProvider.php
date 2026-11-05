@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
-use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LogoutResponse;
+use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -21,8 +21,8 @@ class FortifyServiceProvider extends ServiceProvider
      * Register any application services.
      */
     public function register(): void {
-        //ログアウト後のリダイレクト先を設定
-        $this->app->instance(LogoutResponse::class, new class () implements LogoutResponse {
+        // ログアウト後のリダイレクト先を設定
+        $this->app->instance(LogoutResponse::class, new class implements LogoutResponse {
             public function toResponse($request) {
                 return redirect('/login');
             }

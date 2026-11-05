@@ -4,11 +4,11 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -48,24 +48,21 @@ class User extends Authenticatable
     ];
 
     /**
-     * 登録した書籍
-     * @return HasMany
+     * このユーザーが登録した書籍
      */
     public function registeredBooks(): HasMany {
         return $this->hasMany(Book::class);
     }
 
     /**
-     * 投稿したレビュー
-     * @return HasMany
+     * このユーザーが投稿したレビュー
      */
     public function postReviews(): HasMany {
         return $this->hasMany(Review::class);
     }
 
     /**
-     * レビューに対するいいね
-     * @return BelongsToMany
+     * このユーザーがいいねしたレビュー
      */
     public function likedReviews(): BelongsToMany {
         // 外部キーはuser_idとreview_idで規約通りのため省略
@@ -73,8 +70,7 @@ class User extends Authenticatable
     }
 
     /**
-     * お気に入り書籍
-     * @return BelongsToMany
+     * このユーザーが登録したお気に入り書籍
      */
     public function favoriteBooks(): BelongsToMany {
         // 外部キーはuser_idとbook_idで規約通りのため省略
@@ -82,8 +78,7 @@ class User extends Authenticatable
     }
 
     /**
-     * 読書計画
-     * @return HasMany
+     * このユーザーが所持している読書計画
      */
     public function readingPlans(): HasMany {
         return $this->hasMany(ReadingPlan::class);

@@ -3,27 +3,21 @@
 namespace Tests\Feature\BookManager;
 
 use App\Models\Book;
-use App\Models\Genre;
 use App\Models\Review;
 use App\Models\User;
-use Database\Seeders\UserSeeder;
 use Database\Seeders\GenreSeeder;
-use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
-use Tests\TestCase;
-use Illuminate\Testing\TestResponse;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Testing\TestResponse;
+use Tests\TestCase;
 
 class AdvancedBookTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * 応用機能キーワード検索テスト
+     * キーワード検索を実行した時に、期待通りの結果を返す
      */
     public function testKeywordSearch(): void {
         // 1. 1冊目=title: テスト, author: author1
@@ -34,7 +28,7 @@ class AdvancedBookTest extends TestCase
         // 4. 「スト」で部分一致検索
         // 5. テスト: 1冊目の書籍が表示される
         // 6. 「2」で著者部分一致検索
-        // 7. テスト: 2の書籍が表示される
+        // 7. テスト: 2冊目の書籍が表示される
         // 8. 「author」で著者部分一致検索
         // 9. テスト: 1と2の書籍が表示される
         // 10. 「authors」で検索
@@ -61,7 +55,7 @@ class AdvancedBookTest extends TestCase
     }
 
     /**
-     * 応用機能ジャンルフィルタテスト
+     * ジャンルフィルタを実行した時に、期待通りの結果を返す
      */
     public function testGenreFilter(): void {
         // 1. 1冊目=title: テスト, author: author1
@@ -73,11 +67,11 @@ class AdvancedBookTest extends TestCase
         // 5. 「ジャンルID2」でフィルタリング
         // 6. テスト: 1冊目の書籍が表示される
         // 7. 「ジャンルID3」でフィルタリング
-        // 8. テスト: 2の書籍が表示される
+        // 8. テスト: 2冊目の書籍が表示される
         // 9. 「ジャンルID4」でフィルタリング
-        // 10. テスト: 書籍が表示されない
+        // 10. テスト: 1冊も表示されない
 
-        //1
+        // 1
         $firstBook = Book::factory()->create(['title' => 'テスト', 'author' => 'author1']);
         $secondBook = Book::factory()->create(['title' => '検証', 'author' => 'author2']);
 
@@ -100,7 +94,7 @@ class AdvancedBookTest extends TestCase
     }
 
     /**
-     * 応用機能ソートテスト
+     * ソートを実行した時に、期待通りの結果を返す
      */
     public function testSort(): void {
         // 1. 1冊目=title: 1_title, author: author1, 'created_at': '2000-01-01'
@@ -160,7 +154,7 @@ class AdvancedBookTest extends TestCase
     }
 
     /**
-     * 応用機能検索・フィルタ・ソート複合テスト
+     * 応用機能検索・フィルタ・ソートを複合して実行した時、期待通りの結果を返す
      */
     public function testKeywordFilterSort(): void {
         // 1. 書籍を作成する
@@ -190,7 +184,7 @@ class AdvancedBookTest extends TestCase
         $this->getBooks([
             'keyword' => 'title',
             'genre' => 1,
-            'sort' => 'title'
+            'sort' => 'title',
         ])
             ->assertSeeInOrder([
                 $books[1]->title,
@@ -203,7 +197,7 @@ class AdvancedBookTest extends TestCase
             $this->getBooks([
                 'keyword' => '3',
                 'genre' => 3,
-                'sort' => 'title'
+                'sort' => 'title',
             ]),
             [],
             $books
@@ -213,7 +207,7 @@ class AdvancedBookTest extends TestCase
         $this->getBooks([
             'keyword' => 'author',
             'genre' => 3,
-            'sort' => 'title'
+            'sort' => 'title',
         ])
             ->assertSeeInOrder([
                 $books[2]->title,
@@ -223,7 +217,7 @@ class AdvancedBookTest extends TestCase
     }
 
     /**
-     * 応用機能GoogleBooksApi isbn検索テスト
+     * GoogleBooksApiによるisbn検索を実行した時、期待通りの結果を返す
      */
     public function testSearchIsbn(): void {
         // 1. 認証ユーザーとして/books/createにアクセスする
@@ -242,6 +236,8 @@ class AdvancedBookTest extends TestCase
         $isbn = '9784798147390';
         $imageUrl = 'http://books.google.com/books/content?id=JUWGEAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api';
         $description = 'APIの設計パターンを解説する書籍です。';
+
+        // 意図しない通信パターンによる外部アクセスを制限する
         Http::preventStrayRequests();
         Http::fake([
             'https://www.googleapis.com/books/v1/volumes*' => Http::response([
@@ -253,7 +249,7 @@ class AdvancedBookTest extends TestCase
                             'description' => $description,
                             'imageLinks' => ['thumbnail' => $imageUrl],
                             'publishedDate' => '2022-08-26',
-                        ]
+                        ],
                     ],
                 ],
             ]),
@@ -276,27 +272,27 @@ class AdvancedBookTest extends TestCase
 
     /**
      * seederからテストジャンル生成
-     *
-     * @return void
      */
     private function createTestGenresFromSeeder(): void {
-        // シーダーからテストジャンルを作成する
         $this->seed([
-                // UserSeeder::class,
             GenreSeeder::class,
-            // BookSeeder::class,
-            // ReviewSeeder::class,
-            // FavoriteSeeder::class,
-            // ReviewLikeSeeder::class,
         ]);
     }
 
-    /** クエリパラメータを付けて書籍一覧APIにアクセスする */
+    /**
+     * クエリパラメータを付けて書籍一覧APIにアクセスする
+     *
+     * @param  array  $query  クエリパラメータ (Key..フィールド Value..入力内容)
+     */
     private function getBooks(array $query = []): TestResponse {
         return $this->requestBooks($query)->assertOk();
     }
 
-    /** 正常・異常の両ケースで使う書籍一覧APIへのリクエスト */
+    /**
+     * 正常・異常の両ケースで使う書籍一覧APIへのリクエスト
+     *
+     * @param  array  $query  クエリパラメータ (Key..フィールド Value..入力内容)
+     */
     private function requestBooks(array $query = []): TestResponse {
         $url = '/books';
         if ($query !== []) {
@@ -308,12 +304,14 @@ class AdvancedBookTest extends TestCase
 
     /**
      * 期待される表示・非表示書籍を検証
-     * @param TestResponse $response
-     * @param array|Collection $visibleBooks
-     * @param array|Collection $invisibleBooks
-     * @return TestResponse
+     *
+     * @param  array|Collection  $visibleBooks  表示書籍models
+     * @param  array|Collection  $invisibleBooks  非表示書籍models
      */
-    private function assertSeeBookTitleAuthor(TestResponse $response, array|Collection $visibleBooks, array|Collection $invisibleBooks): TestResponse {
+    private function assertSeeBookTitleAuthor(
+        TestResponse $response,
+        array|Collection $visibleBooks,
+        array|Collection $invisibleBooks): TestResponse {
         foreach ($visibleBooks as $book) {
             $response->assertSeeText($book->title);
             $response->assertSeeText($book->author);
@@ -329,14 +327,11 @@ class AdvancedBookTest extends TestCase
 
     /**
      * 対象書籍にレビュー作成
-     * @param Book $book
-     * @param float $rating
-     * @return void
      */
-    private function createReview(Book $book, float $rating) {
+    private function createReview(Book $book, float $rating): void {
         Review::factory()->create([
             'book_id' => $book->id,
-            'rating' => $rating
+            'rating' => $rating,
         ]);
     }
 }

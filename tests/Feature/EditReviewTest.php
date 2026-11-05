@@ -2,15 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Review;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\ReviewSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class EditReviewTest extends TestCase
@@ -18,20 +19,17 @@ class EditReviewTest extends TestCase
     use RefreshDatabase;
 
     public const RATING = 5;
+
     public const COMMENT = 'テストレビューです';
 
     /**
-     * PUT送信処理
-     * @param Review $review
-     * @param mixed $rating
-     * @param mixed $comment
-     * @return \Illuminate\Testing\TestResponse
+     * 引数に与えられた内容でレビュー更新URLにPUT送信
      */
     private function putUpdateReview(
         Review $review,
-        $rating = self::RATING,
-        $comment = self::COMMENT,
-    ) {
+        mixed $rating = self::RATING,
+        mixed $comment = self::COMMENT,
+    ): TestResponse {
         return $this->actingAs(User::findOrFail($review->user_id))
             ->put(route('reviews.update', $review), [
                 'rating' => $rating,
@@ -39,7 +37,9 @@ class EditReviewTest extends TestCase
             ]);
     }
 
-    /** ゲストとしてレビュー編集画面へアクセスする */
+    /**
+     * ゲストとしてレビュー編集画面へアクセスするとログイン画面にリダイレクトされる
+     */
     public function testCannotGuestEditReview(): void {
         // 1. レビューを作成する
         // 2. ゲストとしてGET /reviews/{review}/editにアクセス
@@ -49,7 +49,9 @@ class EditReviewTest extends TestCase
         $this->get("/reviews/{$review->id}/edit")->assertRedirect('/login');
     }
 
-    /** レビュー編集画面が表示される */
+    /**
+     * 認証ユーザーはレビュー編集画面にアクセスできる
+     */
     public function testEditView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 対象レビュー投稿者として認証し、レビュー編集画面にアクセス
@@ -67,7 +69,7 @@ class EditReviewTest extends TestCase
             ->assertViewHas('review', fn (Review $shownReview) => $shownReview->is($review));
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . route('reviews.update', $review) . '"]');
@@ -86,7 +88,9 @@ class EditReviewTest extends TestCase
         $this->assertSame($review->comment, $comments->item(0)->textContent);
     }
 
-    /** 正常な入力をして「更新」ボタンを押下する */
+    /**
+     * 正常な入力をして「更新」ボタンを押下すると、レビュー更新に成功する
+     */
     public function testUpdateReview(): void {
         // 1. Seederからテストデータを作成する
         // 2. レビュー投稿者として認証し、putUpdateReview()でレビュー更新
@@ -139,8 +143,8 @@ class EditReviewTest extends TestCase
     }
 
     /**
-     * 不正項目の入力に対して、バリデーションメッセージが表示される(rating編)
-     * このテストは、ブラウザ操作ではなく、外部からput送信された時に書き換わることがないかのテスト
+     * ratingフィールドを不正なリクエストでPUT送信したとき、更新処理に失敗する
+     * このテストはブラウザ操作ではなく、外部からput送信された時に書き換わることがないかのテスト
      */
     public function testRatingValidation(): void {
         // 1. Seederからテストデータを作成する
@@ -180,7 +184,9 @@ class EditReviewTest extends TestCase
         }
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(comment編) */
+    /**
+     * commentフィールドを不正なリクエストでPUT送信したとき、更新処理に失敗する
+     */
     public function testCommentValidation(): void {
         // 1. テストデータを作成する
         // 2. レビュー投稿者として認証し、commentを空にしてPUT送信
@@ -215,7 +221,6 @@ class EditReviewTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,

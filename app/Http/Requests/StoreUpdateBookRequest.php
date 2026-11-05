@@ -16,8 +16,6 @@ class StoreUpdateBookRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
@@ -29,20 +27,18 @@ class StoreUpdateBookRequest extends FormRequest
                 'digits:13',
                 // 新規登録・更新共通のカスタムリクエスト
                 // 新規登録時のroute('book')はnullのためignore部分は処理されない
-                Rule::unique('books', 'isbn')->ignore($this->route('book'))
+                Rule::unique('books', 'isbn')->ignore($this->route('book')),
             ],
             'published_date' => ['nullable', 'date_format:Y-m-d'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:10000'],
             'genres' => ['required', 'array'],
             'genres.*' => ['integer', 'exists:genres,id'],
-            'image_url' => ['nullable', 'url', 'max:2048']
+            'image_url' => ['nullable', 'url', 'max:2048'],
         ];
     }
 
     /**
-     * バリデーションエラー時メッセージ
-     *
-     * @return array
+     * バリデーションメッセージ
      */
     public function messages(): array {
         return [
@@ -56,8 +52,9 @@ class StoreUpdateBookRequest extends FormRequest
             'isbn.digits' => 'ISBNを13桁の数字で入力してください（ハイフン不要）',
             'isbn.unique' => 'このISBNは登録済みです',
 
-            'published_date.required' => '出版日を入力してください',
-            'published_date.date_format' => '出版日をyyyy/mm/dd形式で入力してください',
+            'published_date.date_format' => '出版日をyyyy-mm-dd形式で入力してください',
+
+            'description.max' => '説明は10000文字以内で入力してください',
 
             'genres.required' => 'ジャンルを選択してください',
 

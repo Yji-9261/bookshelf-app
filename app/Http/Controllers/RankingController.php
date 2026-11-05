@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 
 class RankingController extends Controller
 {
@@ -13,24 +13,25 @@ class RankingController extends Controller
      */
     public function index(): View {
         return View('ranking.index', [
-            'rankedBooks' => $this->getRankedBooks()
+            'rankedBooks' => $this->getRankedBooks(),
         ]);
     }
 
     /**
-     * 書籍一覧をランキング表示に必要に整形して取得する
+     * レビューのある書籍を平均評価の降順で最大10件取得する。
+     * 各書籍に平均評価とレビュー件数を付与する。
+     * 平均評価と件数の高い順に並び替え。
      *
-     * @return Collection
+     * @return Collection<int, Book>
      */
     private function getRankedBooks(): Collection {
-        // レビューが存在が存在する、平均評価top10を降順で取得する
         return
             Book::withAvg('reviews', 'rating')
                 ->withCount('reviews')
                 ->has('reviews')
-                ->get()
-                ->sortByDesc('reviews_avg_rating')
-                ->take(10)
-                ->values();
+                ->orderByDesc('reviews_avg_rating')
+                ->orderByDesc('reviews_count')
+                ->limit(10)
+                ->get();
     }
 }

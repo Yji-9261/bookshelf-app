@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class FavoriteSeeder extends Seeder
 {
@@ -28,9 +28,8 @@ class FavoriteSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void {
-        $users = User::all();
-        foreach ($this->initialValues as $index => $values) {
-            $users[$index]->favoriteBooks()->syncWithoutDetaching($values);
+        foreach (User::all() as $index => $user) {
+            $user->favoriteBooks()->syncWithoutDetaching($this->initialValues[$index]);
         }
     }
 }

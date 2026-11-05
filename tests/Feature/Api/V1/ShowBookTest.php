@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,7 +12,9 @@ class ShowBookTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** API書籍詳細を取得し期待通りのレスポンスが返ってくる */
+    /**
+     * API書籍詳細を実行し、期待通りのレスポンスが返ってくる
+     */
     public function testBooksShow(): void {
         // 1. 1件の書籍を作成する
         // 2. 作成した書籍に['小説', 'エッセイ']を紐つける
@@ -70,7 +72,9 @@ class ShowBookTest extends TestCase
             ]);
     }
 
-    /** 存在しない書籍のAPI書籍詳細を実行した時、期待通りのエラーレスポンスが返ってくる */
+    /**
+     * 存在しない書籍に対してAPI書籍詳細を実行した時、期待通りのエラーレスポンスが返ってくる
+     */
     public function testBookNotFound(): void {
         // 1. 1件の書籍を作成する
         // 2. GET /api/v1/books/2にアクセス

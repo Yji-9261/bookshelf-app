@@ -14,7 +14,10 @@ class ReviewSeeder extends Seeder
      */
     public function run(): void {
         Book::all()->each(function ($book) {
+            // 全書籍に対してレビュー数を2~4でランダムに割り当てる
             $reviewCount = rand(2, 4);
+
+            // レビュー投稿者もランダムで決める
             User::all()->random($reviewCount)
                 ->each(function ($user) use ($book) {
                     Review::factory()->create([

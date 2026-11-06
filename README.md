@@ -61,10 +61,12 @@ cp .env.example .env
 #### 7. フロントエンドアセットのビルド
 ```bash
 ./vendor/bin/sail npm install
+```
+```bash
 ./vendor/bin/sail npm run dev
 ```
 > [!NOTE]
-> 上記コマンドは常時実行しておいてください。
+> ./vendor/bin/sail npm run devコマンドは常時実行しておいてください。
 > 以降の手順は別のターミナルを開き、bookshelf-appディレクトリに移動してください。
 
 #### 8. Schedulerの起動

@@ -135,7 +135,7 @@ class AdvancedAuthorizationTest extends TestCase
     /**
      * ゲストは読書計画の新規作成はできない
      */
-    public function testGuestCannnotCreateReadingPlan() :void{
+    public function testGuestCannnotCreateReadingPlan(): void {
         // 1.書籍を作成する
         // 2.ゲストとしてPOST /reading-plans/createにアクセスする
         // 3.ログイン画面にリダイレクトされ、読書計画の登録に失敗する
@@ -144,11 +144,11 @@ class AdvancedAuthorizationTest extends TestCase
         $book = Book::factory()->create();
 
         // 2,3
-        $this->post('/reading-plans/create',[
+        $this->post('/reading-plans/create', [
             'book_id' => $book->id,
-            'target_date' => now()->toDateString()
+            'target_date' => now()->toDateString(),
         ])
-        ->assertRedirect('login');
+            ->assertRedirect('login');
 
         $this->assertDatabaseEmpty('reading_plans');
     }

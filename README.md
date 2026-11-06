@@ -120,7 +120,7 @@ MySQLでの定義を記載しています。`◯` は該当する制約を表し
 
 - `bigint` はすべて `UNSIGNED` です。各テーブルの `bigint` 型の `id` は自動採番です。
 - `foreign key` 欄の外部キーはすべて `ON DELETE CASCADE` です。参照先の削除に伴い、参照元の行も削除されます。
-- `created_at`・`updated_at` はNULLを許可し、DBによる自動更新は設定されていません。
+- `created_at`・`updated_at` はNULLを許可しますが、通常の登録・更新では日時を自動設定します。
 
 ### users テーブル
 

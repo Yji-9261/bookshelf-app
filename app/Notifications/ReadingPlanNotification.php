@@ -4,46 +4,48 @@ namespace App\Notifications;
 
 use App\Models\ReadingPlan;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ReadingPlanNotification extends Notification
 {
     use Queueable;
 
+    /**
+     * 期限３日前
+     */
+    const THREE_DAYS_BEFORE = 3;
+
+    /**
+     * 期限当日
+     */
+    const ON_DUE_DATE = 0;
+
+    /**
+     * 期限3日後
+     */
+    const THREE_DAYS_AFTER = -3;
+
+    /**
+     * 通知対象となる読書計画
+     */
     private ReadingPlan $plan;
 
     /**
-     * Create a new notification instance.
+     * 期日が3日後・当日・3日前の読書計画を通知対象として受け取る
      */
     public function __construct(ReadingPlan $plan) {
         $this->plan = $plan;
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
+     * 通知チャネルとしてデータベースを指定する
      */
     public function via(object $notifiable): array {
         return ['database'];
     }
 
     /**
-     * Get the mail representation of the notification.
-     */
-    // public function toMail(object $notifiable): MailMessage
-    // {
-    //     return (new MailMessage)
-    //         ->line('The introduction to the notification.')
-    //         ->action('Notification Action', url('/'))
-    //         ->line('Thank you for using our application!');
-    // }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
+     * 通知タイミング、対象書籍のタイトル、通知内容を返す
      */
     public function toDatabase(object $notifiable): array {
         $title = $this->plan->book->title;
@@ -52,19 +54,9 @@ class ReadingPlanNotification extends Notification
         $diffDay = today()->diffInDays($this->plan->target_date, false);
 
         return match ($diffDay) {
-            3 => ['timing' => 'three_days_before', 'title' => $title, 'body' => '期限三日前です'],
-            0 => ['timing' => 'on_due_date', 'title' => $title, 'body' => '本日が期限です'],
-            -3 => ['timing' => 'three_days_after', 'title' => $title, 'body' => '期限を三日過ぎています'],
+            self::THREE_DAYS_BEFORE => ['timing' => 'three_days_before', 'title' => $title, 'body' => '期限三日前です'],
+            self::ON_DUE_DATE => ['timing' => 'on_due_date', 'title' => $title, 'body' => '本日が期限です'],
+            self::THREE_DAYS_AFTER => ['timing' => 'three_days_after', 'title' => $title, 'body' => '期限を三日過ぎています'],
         };
-    }
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array {
-        return [
-
-        ];
     }
 }

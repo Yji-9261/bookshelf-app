@@ -3,37 +3,36 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\BookResource;
 use App\Http\Requests\Api\V1\IndexBookRequest;
 use App\Http\Requests\Api\V1\StoreUpdateBookRequest;
+use App\Http\Resources\Api\V1\BookResource;
 use App\Models\Book;
 use App\Models\Genre;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class BookController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @param IndexBookRequest $request
-     * @return AnonymousResourceCollection
      */
     public function index(IndexBookRequest $request): AnonymousResourceCollection {
         $validated = $request->validated();
 
         // ページネーションデフォルトは20
-        $per_page = $validated['per_page'] ?? 20;
+        $perPage = $validated['per_page'] ?? 20;
 
         $books = Book::query()
+            ->orderBy('id')
             ->with('genres')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
 
             // キーワード検索（タイトル・著者名への部分一致）
             ->when(
-                $validated['keyword'] ?? null,
+                // キーワードに0が指定されても実行できるようにstrに変換
+                isset($validated['keyword']) ? str($validated['keyword']) : null,
                 function ($query, $keyword) {
                     // whereで囲んでorWhere以降の検索優先順位を保護
                     $query->where(function ($query) use ($keyword) {
@@ -45,21 +44,19 @@ class BookController extends Controller
 
             // ジャンル検索
             ->when(
-                $validated['genre'] ?? null,
+                isset($validated['genre']) ? str($validated['genre']) : null,
                 function ($query, $genre) {
                     return $query->whereHas('genres', fn ($query) => $query->where('name', $genre));
                 }
             )
-            ->paginate($per_page);
+            ->paginate($perPage)
+            ->withQueryString();
 
         return BookResource::collection($books);
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param StoreUpdateBookRequest $request
-     * @return JsonResponse
      */
     public function store(StoreUpdateBookRequest $request): JsonResponse {
         $book = DB::transaction(function () use ($request) {
@@ -78,7 +75,8 @@ class BookController extends Controller
             return $book;
         });
 
-        $book->load('genres')
+        // 書籍作成直後のためレビューは存在しないがAPI仕様書に合わせる
+        $book->load('genres', 'reviews')
             ->loadCount('reviews')
             ->loadAvg('reviews', 'rating');
 
@@ -89,23 +87,17 @@ class BookController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param Book $book
-     * @return BookResource
      */
     public function show(Book $book): BookResource {
         $book->load('genres', 'reviews.user')
             ->loadCount('reviews')
             ->loadAvg('reviews', 'rating');
+
         return new BookResource($book);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param StoreUpdateBookRequest $request
-     * @param Book $book
-     * @return BookResource
      */
     public function update(StoreUpdateBookRequest $request, Book $book): BookResource {
         DB::transaction(function () use ($request, $book) {
@@ -130,13 +122,11 @@ class BookController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param Book $book
-     * @return JsonResponse
      */
     public function destroy(Book $book): JsonResponse {
         $this->authorize('delete', $book);
         $book->delete();
+
         return response()->json(null, 204);
     }
 }

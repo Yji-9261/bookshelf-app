@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Genre;
+use Illuminate\Database\Seeder;
 
 class GenreSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class GenreSeeder extends Seeder
         $genres = ['小説', 'ビジネス', '技術書', '自己啓発', 'エッセイ', '歴史', '科学', '芸術', '料理', '旅行'];
         foreach ($genres as $genre) {
             Genre::firstOrCreate([
-                'name' => $genre
+                'name' => $genre,
             ]);
         }
     }

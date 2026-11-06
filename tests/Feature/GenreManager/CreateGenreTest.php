@@ -2,15 +2,12 @@
 
 namespace Tests\Feature\Genre;
 
-use App\Models\User;
 use App\Models\Genre;
-use Database\Seeders\UserSeeder;
+use App\Models\User;
 use Database\Seeders\GenreSeeder;
-use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
-use Database\Seeders\FavoriteSeeder;
-use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class CreateGenreTest extends TestCase
@@ -19,15 +16,21 @@ class CreateGenreTest extends TestCase
 
     public const NAME = 'テスト';
 
-    private function postCreateGenre($name = self::NAME) {
+    /**
+     * 引数に与えられた内容でジャンル登録urlにPOST送信
+     *
+     * @param  string  $name  ジャンル名
+     */
+    private function postCreateGenre(string $name = self::NAME): TestResponse {
         return $this->actingAs(User::findOrFail(1))
             ->post(route('genres.store'), [
                 'name' => $name,
             ]);
     }
 
-
-    /** ゲストがジャンル登録リンクを押下するとログイン画面にリダイレクトする */
+    /**
+     * ゲストがジャンル登録リンクを押下するとログイン画面にリダイレクトする
+     */
     public function testGuestCannotCreateGenre(): void {
         // 1. Seederからテストデータを作成する
         // 2. ゲストとしてジャンル登録画面にアクセス
@@ -43,7 +46,9 @@ class CreateGenreTest extends TestCase
         $this->assertGuest();
     }
 
-    /** 認証ユーザーはページが正常に表示される */
+    /**
+     * 認証ユーザーはジャンル登録画面が正常に表示される
+     */
     public function testCreateView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとしてジャンル登録画面にアクセス
@@ -60,7 +65,7 @@ class CreateGenreTest extends TestCase
             ->assertSeeText('ジャンル登録');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . route('genres.store') . '"]');
@@ -74,7 +79,7 @@ class CreateGenreTest extends TestCase
     }
 
     /**
-     * 正常な入力をして「登録」ボタンを押下する
+     * 正常な入力をして「登録」ボタンを押下すると、ジャンル登録に成功する
      */
     public function testCreateGenre(): void {
         // 1. seederからテストデータ作成
@@ -103,7 +108,9 @@ class CreateGenreTest extends TestCase
         $this->assertDatabaseCount('genres', $genreCount + 1);
     }
 
-    /** 不正な入力をして「登録」ボタンを押下する */
+    /**
+     * nameフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     */
     public function testNameValidation(): void {
         // 1. seederからテストデータ作成
         // 2. postCreateGenre(name:'')を実行
@@ -122,6 +129,7 @@ class CreateGenreTest extends TestCase
         $cases = [
             ['', 'ジャンルを入力してください'],
             ['小説', 'このジャンルはすでに登録されています'],
+            [str_repeat('あ', 256), 'ジャンルを255文字以内で入力してください'],
         ];
 
         // 2~7
@@ -143,14 +151,9 @@ class CreateGenreTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,
-            BookSeeder::class,
-            ReviewSeeder::class,
-            FavoriteSeeder::class,
-            ReviewLikeSeeder::class,
         ]);
     }
 }

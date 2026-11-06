@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
@@ -16,13 +16,15 @@ class CreateBookTest extends TestCase
 
     protected User $user;
 
-    public function setUp(): void {
+    protected function setUp(): void {
         parent::setUp();
 
         $this->user = User::factory()->create();
     }
 
-    /** 未認証ユーザーは書籍を登録できない */
+    /**
+     * ゲストは書籍を登録できない
+     */
     public function testGuestCannotCreateBook(): void {
         // sanctum認証を行わない場合、認証エラーを確認
         $bookRecord = $this->validBookData();
@@ -33,8 +35,9 @@ class CreateBookTest extends TestCase
         $this->assertDatabaseEmpty('books');
     }
 
-
-    /** API書籍登録を実行し期待通りの結果となる */
+    /**
+     * 認証ユーザーはAPI書籍登録を正常なリクエストで実行したとき、正常に終了する
+     */
     public function testBooksCreate(): void {
         // 1. ユーザーを作成し、validBookData()で小説ジャンル・有効な登録データを作成する
         // 2. 「小説」「エッセイ」の2種類のジャンルを用意する
@@ -43,7 +46,6 @@ class CreateBookTest extends TestCase
         // 5. テスト: 認証ユーザーを登録者として書籍が1件保存され、指定した2ジャンルが紐付く
 
         // 1
-        $user = User::factory()->create();
         $bookRecord = $this->validBookData();
         unset($bookRecord['user_id']);
 
@@ -53,7 +55,7 @@ class CreateBookTest extends TestCase
         $bookRecord['genres'][] = $essay->name;
 
         // 3
-        // 書籍テーブルが空であることを検証
+        // あらかじめ書籍テーブルが空であることを検証
         $this->assertDatabaseEmpty('books');
 
         // 認証しpostアクセス
@@ -80,6 +82,7 @@ class CreateBookTest extends TestCase
                 'genres' => $response->json('data.genres'),
                 'reviews_avg_rating' => 0,
                 'reviews_count' => 0,
+                'reviews' => [],
             ],
         ]);
 
@@ -102,7 +105,7 @@ class CreateBookTest extends TestCase
 
         $this->assertDatabaseCount('books', 1);
 
-        //book_genreテーブルのリレーションを確認する
+        // book_genreテーブルのリレーションを確認する
         foreach ([$novel, $essay] as $genre) {
             $this->assertDatabaseHas('book_genre', [
                 'book_id' => $book->id,
@@ -113,7 +116,9 @@ class CreateBookTest extends TestCase
         $this->assertSame(2, $book->genres()->count());
     }
 
-    /** タイトルの不正入力を拒否する */
+    /**
+     * API書籍登録のtitleフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testTitleValidation(): void {
         // 1. 有効な登録データを用意する
         // 2. タイトルを未入力・256文字・配列に変更してPOSTする
@@ -125,7 +130,9 @@ class CreateBookTest extends TestCase
         ]);
     }
 
-    /** 著者名の不正入力を拒否する */
+    /**
+     * API書籍登録のauthorフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testAuthorValidation(): void {
         // 1. 有効な登録データを用意する
         // 2. 著者名を未入力・256文字・配列に変更してPOSTする
@@ -137,7 +144,9 @@ class CreateBookTest extends TestCase
         ]);
     }
 
-    /** ISBNの未入力・形式不正・重複を拒否する */
+    /**
+     * API書籍登録のisbnフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testIsbnValidation(): void {
         // 1. 登録済みISBNの書籍を作成する
         // 2. ISBNを未入力・ハイフン入り・12桁・14桁・登録済みに変更してPOSTする
@@ -153,11 +162,16 @@ class CreateBookTest extends TestCase
         ]);
     }
 
-    /** 出版日のフォーマットバリデーションテスト。未入力は許可（応用版機能テスト） */
+    /**
+     * API書籍登録のpublished_dateフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testPublishedDateValidation(): void {
-        // 1. 有効な登録データを用意する
-        // 2. 出版日を未入力・形式不正・存在しない日付に変更してPOSTする
-        // 3. HTTP 422と出版日のメッセージを確認し、DBが増えないことを確認する
+        // 1. 出版日を形式不正の形式でPOSTする
+        // 2. テスト: DBへの登録に失敗し、期待通りのエラーレスポンスを返す
+        // 3. 出版日をありえない日付にしてPOSTする
+        // 4. テスト: DBへの登録に失敗し、期待通りのエラーレスポンスを返す
+        // 5. 基本機能からの変更点、出版日を未入力にしてPOSTする
+        // 6. テスト: DBに登録される
         $this->assertInvalidBookCases('published_date', [
             ['26-1-1', '出版日をyyyy-mm-dd形式で入力してください'],
             ['2026-02-30', '出版日をyyyy-mm-dd形式で入力してください'],
@@ -180,20 +194,24 @@ class CreateBookTest extends TestCase
         $this->assertSame($newBook->published_date, null);
     }
 
-    /** ジャンルの未選択・型不正・未登録名を拒否する */
+    /**
+     * API書籍登録のgenresフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testGenresValidation(): void {
         // 1. 登録済みジャンルを含む有効なデータを用意する
         // 2. ジャンルを空配列・文字列・数値要素・未登録名に変更してPOSTする
         // 3. HTTP 422と該当キーのエラーを確認し、書籍と紐付けが増えないことを確認する
         $this->assertInvalidBookCases('genres', [
-            [[], 'ジャンルを選択してください'],
-            ['小説', null],
+            [[], 'genresを入力してください'],
+            ['小説', 'genresは配列形式で入力してください'],
             [[123], 'ジャンルは文字列で入力してください', 'genres.0'],
             [['未登録のジャンル'], '登録済みのジャンルを入力して下さい', 'genres.0'],
         ]);
     }
 
-    /** 画像URLの形式不正と文字数超過を拒否する */
+    /**
+     * API書籍登録のimage_urlフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testImageUrlValidation(): void {
         // 1. 有効な登録データを用意する
         // 2. 画像URLを形式不正・2049文字に変更してPOSTする
@@ -205,7 +223,9 @@ class CreateBookTest extends TestCase
         ]);
     }
 
-    /** 説明の型不正を拒否する */
+    /**
+     * API書籍登録のdescriptionフィールドに不正な入力で実行したとき、登録に失敗する
+     */
     public function testDescriptionValidation(): void {
         // 1. 有効な登録データを用意する
         // 2. 説明に配列を指定してPOSTする
@@ -213,7 +233,9 @@ class CreateBookTest extends TestCase
         $this->assertInvalidBookCases('description', [[['不正な型'], null]]);
     }
 
-    /** 他の項目が有効な登録データを作成する */
+    /**
+     * API書籍登録に有効な登録データを作成する
+     */
     private function validBookData(): array {
         $genre = Genre::firstOrCreate(['name' => '小説']);
 
@@ -229,7 +251,12 @@ class CreateBookTest extends TestCase
         ];
     }
 
-    /** 対象項目だけを書き換え、エラーとDB件数を検証する */
+    /**
+     * 対象項目だけを書き換え、エラーとDB件数を検証する
+     *
+     * @param  string  $field  対象となる入力フィールド
+     * @param  array  $cases  フィールドへの不正入力値と期待するバリデーションメッセージの組み合わせ配列
+     */
     private function assertInvalidBookCases(string $field, array $cases): void {
         $data = $this->validBookData();
         $bookCount = Book::count();

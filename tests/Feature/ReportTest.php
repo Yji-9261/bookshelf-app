@@ -2,28 +2,31 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Review;
 use App\Models\Book;
 use App\Models\Genre;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\Review;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReadingPlanSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class ReportTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** ゲストがマイ読書レポート画面にアクセスする */
+    /**
+     * ゲストがマイ読書レポート画面にアクセスするとログイン画面にリダイレクトされる
+     */
     public function testGuestCannotAccess(): void {
         $this->get('/reports')->assertRedirect('/login');
     }
 
     /**
-     * 認証ユーザーがーマイ読書レポート画面にアクセスする
+     * 認証ユーザーはーマイ読書レポート画面にアクセスできる
      */
     public function testUserCanViewReports(): void {
         $this->actingAs(User::factory()->create())
@@ -31,7 +34,6 @@ class ReportTest extends TestCase
             ->assertOk()
             ->assertViewIs('reports.index');
     }
-
 
     /**
      * 基本統計が正常に表示されている
@@ -67,7 +69,7 @@ class ReportTest extends TestCase
             ->assertViewIs('reports.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $summaries = $xpath->query('//div[h3[normalize-space(.)="基本統計"]]');
@@ -117,7 +119,7 @@ class ReportTest extends TestCase
             ->assertViewIs('reports.index');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $sections = $xpath->query('//div[h3[normalize-space(.)="評価分布"]]');
@@ -195,45 +197,6 @@ class ReportTest extends TestCase
         $this->assertTopRatedBooks($response, $ratingsByBook, [5, 5, 5, 4, 4]);
     }
 
-    /** 高評価書籍欄の件数・対象書籍・評価順・順位・表示内容を確認する */
-    private function assertTopRatedBooks(
-        \Illuminate\Testing\TestResponse $response,
-        array $ratingsByBook,
-        array $expectedRatings,
-    ): void {
-        $document = new \DOMDocument();
-        @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
-        $xpath = new \DOMXPath($document);
-        $sections = $xpath->query('//div[h3[normalize-space(.)="高評価書籍 TOP5"]]');
-        $this->assertCount(1, $sections);
-        $cards = $xpath->query('./div/a', $sections->item(0));
-        $this->assertCount(count($expectedRatings), $cards);
-
-        $seenIds = [];
-        foreach ($cards as $index => $card) {
-            $matchingIds = array_filter(
-                array_keys($ratingsByBook),
-                fn ($id) => route('books.show', $id) === $card->getAttribute('href'),
-            );
-            $this->assertCount(1, $matchingIds, '認証ユーザーの評価4以上の書籍であること');
-            $id = array_values($matchingIds)[0];
-            $this->assertNotContains($id, $seenIds);
-            $seenIds[] = $id;
-            $this->assertSame($expectedRatings[$index], $ratingsByBook[$id]);
-
-            $book = Book::findOrFail($id);
-            $this->assertSame((string) ($index + 1), $xpath->evaluate('normalize-space(./div[1])', $card));
-            $this->assertSame($book->title, $xpath->evaluate('normalize-space(./div[2]/div[1])', $card));
-            $this->assertSame($book->author, $xpath->evaluate('normalize-space(./div[2]/div[2])', $card));
-            $rating = $expectedRatings[$index];
-            $this->assertSame(
-                str_repeat('★', $rating) . str_repeat('☆', 5 - $rating),
-                $xpath->evaluate('normalize-space(./div[3])', $card),
-            );
-        }
-    }
-
-
     /**
      * ジャンル別評価傾向 TOP5が正しく表示されている
      */
@@ -289,12 +252,54 @@ class ReportTest extends TestCase
         $this->assertGenreRatingCards($response, $expected);
     }
 
-    /** ジャンル別評価欄の各カードを、指定順に完全一致で検証する */
+    /**
+     * 高評価書籍欄の件数・対象書籍・評価順・順位・表示内容が正しく表示されている
+     */
+    private function assertTopRatedBooks(
+        TestResponse $response,
+        array $ratingsByBook,
+        array $expectedRatings,
+    ): void {
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
+        $xpath = new \DOMXPath($document);
+        $sections = $xpath->query('//div[h3[normalize-space(.)="高評価書籍 TOP5"]]');
+        $this->assertCount(1, $sections);
+        $cards = $xpath->query('./div/a', $sections->item(0));
+        $this->assertCount(count($expectedRatings), $cards);
+
+        $seenIds = [];
+        foreach ($cards as $index => $card) {
+            $matchingIds = array_filter(
+                array_keys($ratingsByBook),
+                fn ($id) => route('books.show', $id) === $card->getAttribute('href'),
+            );
+            $this->assertCount(1, $matchingIds, '認証ユーザーの評価4以上の書籍であること');
+            $id = array_values($matchingIds)[0];
+            $this->assertNotContains($id, $seenIds);
+            $seenIds[] = $id;
+            $this->assertSame($expectedRatings[$index], $ratingsByBook[$id]);
+
+            $book = Book::findOrFail($id);
+            $this->assertSame((string) ($index + 1), $xpath->evaluate('normalize-space(./div[1])', $card));
+            $this->assertSame($book->title, $xpath->evaluate('normalize-space(./div[2]/div[1])', $card));
+            $this->assertSame($book->author, $xpath->evaluate('normalize-space(./div[2]/div[2])', $card));
+            $rating = $expectedRatings[$index];
+            $this->assertSame(
+                str_repeat('★', $rating) . str_repeat('☆', 5 - $rating),
+                $xpath->evaluate('normalize-space(./div[3])', $card),
+            );
+        }
+    }
+
+    /**
+     * ジャンル別評価欄の各カードを、指定順に完全一致で検証する
+     */
     private function assertGenreRatingCards(
-        \Illuminate\Testing\TestResponse $response,
+        TestResponse $response,
         array $expected,
     ): void {
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $sections = $xpath->query('//div[h3[normalize-space(.)="ジャンル別評価傾向 TOP5"]]');
@@ -312,7 +317,10 @@ class ReportTest extends TestCase
         }
     }
 
-    private function createTestDataFromSeeder() {
+    /**
+     * seederからテストデータ作成
+     */
+    private function createTestDataFromSeeder(): void {
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,

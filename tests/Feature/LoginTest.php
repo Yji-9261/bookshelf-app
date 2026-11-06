@@ -13,29 +13,21 @@ class LoginTest extends TestCase
 
     /**
      * ユーザーemail
-     *
-     * @var string
      */
     private const USER_EMAIL = 'user1@example.com';
 
     /**
      * ユーザーpassword
-     *
-     * @var string
      */
     private const USER_PASSWORD = 'password';
 
     /**
      * 存在しないemail
-     *
-     * @var string
      */
     private const ANONYMOUS_EMAIL = 'guest@example.com';
 
     /**
      * 存在しないpassword
-     *
-     * @var string
      */
     private const ANONYMOUS_PASSWORD = 'pass';
 
@@ -51,7 +43,7 @@ class LoginTest extends TestCase
     }
 
     /**
-     * メールアドレスが未入力の場合、バリデーションメッセージが表示される
+     * メールアドレスが未入力の場合、期待通りのバリデーションメッセージが表示される
      */
     public function testUserEmailRequiredValidation(): void {
         // 1.       ユーザーを登録する
@@ -69,7 +61,7 @@ class LoginTest extends TestCase
     }
 
     /**
-     * パスワードが未入力の場合、バリデーションメッセージが表示される
+     * パスワードが未入力の場合、期待通りのバリデーションメッセージが表示される
      */
     public function testUserPasswordRequiredValidation(): void {
         // 1.       ユーザーを登録する
@@ -87,7 +79,7 @@ class LoginTest extends TestCase
     }
 
     /**
-     *  登録内容と一致しない場合、バリデーションメッセージが表示される
+     *  登録内容と一致しない場合、期待通りのバリデーションメッセージが表示される
      */
     public function testUserEmailNotRegisterValidation(): void {
         // 1. ユーザーを登録する
@@ -112,7 +104,7 @@ class LoginTest extends TestCase
     }
 
     /**
-     * ログアウト後の挙動が意図したものか
+     * ログアウト後の挙動が期待通りである
      */
     public function testLogoutBehavior(): void {
         /**
@@ -134,18 +126,13 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
-
     /**
-     * ユーザーログイン
-     *
-     * @param  mixed  $email
-     * @param  mixed  $password
-     * @return TestResponse
+     * 引数に与えられた内容でログインを行う
      */
     private function loginUser(
-        $email = self::USER_EMAIL,
-        $password = self::USER_PASSWORD
-    ) {
+        mixed $email = self::USER_EMAIL,
+        mixed $password = self::USER_PASSWORD
+    ): TestResponse {
         return $this->post('/login', [
             'email' => $email,
             'password' => $password,

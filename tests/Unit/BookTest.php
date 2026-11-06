@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use App\Models\User;
 use App\Models\Genre;
-use Tests\TestCase;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class BookTest extends TestCase
 {
@@ -13,10 +13,8 @@ class BookTest extends TestCase
 
     /**
      * registerUserのリレーションが適切か
-     *
-     * @return void
      */
-    public function test_registerUser(): void {
+    public function testRegisterUser(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -47,7 +45,7 @@ class BookTest extends TestCase
     /**
      * reviewsのリレーションが適切か
      */
-    public function test_reviews(): void {
+    public function testReviews(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -105,7 +103,7 @@ class BookTest extends TestCase
     /**
      * genresのリレーションが適切か
      */
-    public function test_genres(): void {
+    public function testGenres(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -176,7 +174,7 @@ class BookTest extends TestCase
     /**
      * favoriteUsersのリレーションが適切か
      */
-    public function test_favoriteUsers(): void {
+    public function testFavoriteUsers(): void {
         /**
          * 1. $user = User::create([...])で生成
          * 2. $book = $user->registeredBooks()->create([...])で書籍生成
@@ -250,8 +248,8 @@ class BookTest extends TestCase
          * 2. $book = $user->registeredBooks()->create([...])で書籍生成
          * 3. テスト:$userと$readinPlanのリレーションが構築できているか
          * 4. テスト:$bookと$readinPlanのリレーションが構築されているか
-         * 5. $book->delete()で書籍削除
-         * 6. テスト:$userと$readinPlanのリレーションが解除できているか
+         * 5. $user->delete()でユーザー削除
+         * 6. テスト:$bookと$readinPlanのリレーションが解除できているか
          */
 
         // 1
@@ -283,10 +281,10 @@ class BookTest extends TestCase
         $this->assertDatabaseHas('reading_plans', $readingValue);
 
         // 5
-        $book->delete();
+        $user->delete();
 
         // 6
-        $this->assertSame(0, $user->readingPlans()->count());
+        $this->assertSame(0, $book->readingPlans()->count());
         // DBから削除されていることも確認する
         $this->assertDatabaseMissing('reading_plans', $readingValue);
     }

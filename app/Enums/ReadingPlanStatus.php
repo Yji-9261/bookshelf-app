@@ -15,24 +15,29 @@ enum ReadingPlanStatus: string
     case Completed = 'completed';
 
     /**
+     * 読書状態「期限切れ」
+     */
+    case Expired = 'expired';
+
+    /**
      * 読書状態ごとの表示名を返す
-     * @return string
      */
     public function label(): string {
         return match ($this) {
             self::InProgress => '読書中',
             self::Completed => '読了',
+            self::Expired => '期限切れ',
         };
     }
 
     /**
      * 読書状態ごとのバッジ背景色のCSSを返す
-     * @return string
      */
     public function badgeClass(): string {
         return match ($this) {
             self::InProgress => 'bg-blue-100',
             self::Completed => 'bg-green-100',
+            self::Expired => 'bg-red-100',
         };
     }
 }

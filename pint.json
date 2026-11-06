@@ -1,5 +1,5 @@
 {
-    "preset": "psr12",
+    "preset": "laravel",
     "rules": {
         "php_unit_method_casing": false,
                 "concat_space": {
@@ -10,7 +10,9 @@
         }
     },
     "exclude":[
-        "app/Console",
-        "storage"
-    ]
+        "storage",
+        "bootstrap/cache",
+        "public/build",
+        "node_modules"   
+     ]
 }

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ReadingPlanStatus;
 use App\Models\ReadingPlan;
 use App\Models\User;
-use App\Enums\ReadingPlanStatus;
 use Illuminate\Database\Seeder;
 
 class ReadingPlanSeeder extends Seeder
@@ -66,7 +66,7 @@ class ReadingPlanSeeder extends Seeder
             // 鈴木花子（他ユーザー認可テスト用、ID 6）:
             // 6. target_date = Carbon::today()->addDays(5) / status = 'in_progress' → 山田太郎ログイン中に URL /reading-plans/6/edit 直打ちで 403 確認
             [
-                'book_id' => 1,
+                'book_id' => 6,
                 'user_id' => $suzuki->id,
                 'target_date' => today()->addDays(5),
                 'status' => ReadingPlanStatus::InProgress->value,

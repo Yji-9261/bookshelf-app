@@ -15,19 +15,20 @@ class UpdateReadingPlanRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
-            'target_date' => ['required', 'date_format:Y-m-d']
+            'target_date' => ['required', 'date_format:Y-m-d'],
         ];
     }
 
-    public function messages() {
+    /**
+     * バリデーションメッセージ
+     */
+    public function messages(): array {
         return [
             'target_date.required' => '期日を入力してください',
-            'target_date.date_format' => 'yyyy-mm-dd形式で入力してください',
+            'target_date.date_format' => '期日をyyyy-mm-dd形式で入力してください',
         ];
     }
 }

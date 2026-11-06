@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\BookManager;
 
-use App\Models\User;
 use App\Models\Book;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
+use App\Models\User;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\ReviewSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -226,7 +226,6 @@ class ShowBookTest extends TestCase
             ->assertSeeText('レビューを投稿しました。');
     }
 
-
     /**
      * 既に投稿済みのレビュー書籍に対してレビュー投稿する
      */
@@ -260,8 +259,9 @@ class ShowBookTest extends TestCase
         $this->assertSame($original, $review->refresh()->getAttributes());
     }
 
-
-    /** ゲストはレビューの「いいね」リンクからログイン画面に遷移する */
+    /**
+     * ゲストはレビューの「いいね」リンクからログイン画面に遷移する
+     */
     public function testGuestCannotLike(): void {
         // 1. ゲストとしてレビューの存在する書籍詳細画面にアクセス
         // 2. レビューの「いいね」がログイン画面へのリンクであることを確認
@@ -275,7 +275,7 @@ class ShowBookTest extends TestCase
             ->assertViewIs('books.show');
 
         // 2
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $likeLinks = $xpath->query('//a[contains(normalize-space(.), "いいね")]');
@@ -291,9 +291,18 @@ class ShowBookTest extends TestCase
             ->assertViewIs('auth.login');
     }
 
-    /** 認証ユーザーはレビューのいいねを登録・解除・再登録できる */
+    /**
+     * 認証ユーザーはレビューのいいねを登録・解除・再登録できる
+     */
     public function testLikeToggle(): void {
-        // 1. Seederからレビューを作成し、いいね未登録の認証ユーザーを用意する
+        // 1. Seederからレビューを作成し、いいね未登録の認証ユーザーを生成する
+        // 2. いいねアクションを実行する
+        // 3. テスト: 書籍詳細画面にリダイレクトされ、いいねボタンがいいね済みに変更され、DBが正常に更新される
+        // 4. いいね解除アクションを実行する
+        // 5. テスト: 書籍詳細画面にリダイレクトされ、いいね済みボタンがいいねに変更され、DBが正常に更新される
+        // 6. いいねアクションを実行する
+        // 7. テスト: 書籍詳細画面にリダイレクトされ、いいねボタンがいいね済みに変更され、DBが正常に更新される
+
         $this->createTestDataFromSeeder();
         $user = User::factory()->create();
         $book = Book::whereHas('reviews')->firstOrFail();
@@ -307,7 +316,7 @@ class ShowBookTest extends TestCase
 
         // 対象レビューのフォームに限定して、ボタンの状態といいね数を確認する
         $assertLikeButton = function ($response, string $expected) use ($toggleUrl): void {
-            $document = new \DOMDocument();
+            $document = new \DOMDocument;
             @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
             $xpath = new \DOMXPath($document);
             $buttons = $xpath->query('//form[@action="' . $toggleUrl . '"]//button');
@@ -321,7 +330,7 @@ class ShowBookTest extends TestCase
         $response = $this->get($showUrl)->assertOk()->assertViewIs('books.show');
         $assertLikeButton($response, 'いいね (' . $initialLikeCount . ')');
 
-        // 3〜5. 登録・解除・再登録し、DB・遷移先・メッセージ・ボタン表示・件数を確認する
+        // 3〜7. 登録・解除・再登録し、DB・遷移先・メッセージ・ボタン表示・件数を確認する
         foreach ([true, false, true] as $registered) {
             $this->post($toggleUrl)
                 ->assertRedirect($showUrl);
@@ -342,43 +351,58 @@ class ShowBookTest extends TestCase
         }
     }
 
-    /** 自分のレビューの「編集」ボタンを押下する */
+    /**
+     * 自分のレビューの「編集」ボタンを押下するとレビュー編集画面に遷移する
+     */
     public function testOwnReviewEditLink(): void {
-        // 1. 認証ユーザーとして、自分のレビューが登録されている書籍詳細画面にアクセス
+        // 1. テストデータを作成する
+        // 2. 認証ユーザーとして、自分のレビューが登録されている書籍詳細画面にアクセス
+        // 3. 「編集」リンク先にアクセス
+        // 4. テスト: 編集画面が表示され、対象レビューが渡されている
+
+        // 1
         $this->createTestDataFromSeeder();
         $user = User::whereHas('postReviews')->firstOrFail();
         $review = $user->postReviews()->firstOrFail();
         $editUrl = route('reviews.edit', $review);
 
+        // 2
         $this->actingAs($user);
         $this->get(route('books.show', $review->book))
             ->assertOk()
             ->assertViewIs('books.show')
             ->assertSee('href="' . $editUrl . '"', false);
 
-        // 2. 「編集」リンク先にアクセス
-        // 3. テスト: 編集画面が表示され、対象レビューが渡されている
+        // 3,4
         $this->get($editUrl)
             ->assertOk()
             ->assertViewIs('reviews.edit');
     }
 
-    /** 自分のレビューの「削除」ボタンを押下する */
+    /**
+     * 自分のレビューの「削除」ボタンを押下するとレビューを削除できる
+     */
     public function testOwnReviewDelete(): void {
-        // 1. 認証ユーザーとして、自分のレビューが登録されている書籍詳細画面にアクセス
+        // 1. テストデータ作成
+        // 2. 認証ユーザーとして、自分のレビューが登録されている書籍詳細画面にアクセス
+        // 3. 削除ボタンの送信先へDELETEリクエストを送る
+        // 4. テスト: レビューが削除され、詳細画面から対象の編集・削除操作が消える
+
+        // 1
         $this->createTestDataFromSeeder();
         $user = User::whereHas('postReviews')->firstOrFail();
         $review = $user->postReviews()->firstOrFail();
         $showUrl = route('books.show', $review->book);
         $deleteUrl = route('reviews.destroy', $review);
 
+        // 2
         $this->actingAs($user);
         $response = $this->get($showUrl)
             ->assertOk()
             ->assertViewIs('books.show');
 
         // 対象レビューの削除フォームとDELETE指定を確認
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . $deleteUrl . '"]');
@@ -387,12 +411,12 @@ class ShowBookTest extends TestCase
         $this->assertCount(1, $xpath->query('.//input[@name="_method" and @value="DELETE"]', $forms->item(0)));
         $this->assertSame('削除', $xpath->evaluate('normalize-space(.//button)', $forms->item(0)));
 
-        // 2. 削除ボタンの送信先へDELETEリクエストを送る
+        // 3
         $this->delete($deleteUrl)
             ->assertRedirect($showUrl)
             ->assertSessionHas('success', 'レビューを削除しました。');
 
-        // 3. レビューが削除され、詳細画面から対象の編集・削除操作が消える
+        // 4
         $this->assertDatabaseMissing('reviews', ['id' => $review->id]);
         $this->get($showUrl)
             ->assertOk()
@@ -402,7 +426,9 @@ class ShowBookTest extends TestCase
             ->assertDontSee('href="' . route('reviews.edit', $review) . '"', false);
     }
 
-    /** 自分以外のレビューに「編集」「削除」ボタンが表示されない */
+    /**
+     * 自分以外のレビューに「編集」「削除」ボタンが表示されない
+     */
     public function testOtherReviewActionsHidden(): void {
         // 1. 他のユーザーのレビューが存在する書籍を用意し、未投稿のユーザーとしてアクセス
         // 2. 未投稿ユーザーとして認証し、書籍詳細画面にアクセス
@@ -419,7 +445,7 @@ class ShowBookTest extends TestCase
             ->assertOk()
             ->assertViewIs('books.show');
 
-        // 3:テスト
+        // 3
         $this->assertNotEmpty($book->reviews);
         foreach ($book->reviews as $review) {
             $this->assertNotSame($user->id, $review->user_id);
@@ -429,52 +455,61 @@ class ShowBookTest extends TestCase
         }
     }
 
-    /** 自分が登録した書籍の「編集」ボタンを押下する */
+    /**
+     * 自分が登録した書籍の「編集」ボタンを押下する
+     */
     public function testOwnBookEditLink(): void {
-        // 1. 認証ユーザーが登録した書籍詳細画面にアクセス
-        // 2. テスト: 書籍編集リンクが存在するか確認
-        // 3. 書籍編集リンク先にアクセス
-        // 4. テスト: 書籍編集画面が正しく表示されているか確認
+        // 1. テストデータ作成
+        // 2. 認証ユーザーが登録した書籍詳細画面にアクセス
+        // 3. テスト: 書籍編集リンクが存在するか確認
+        // 4. 書籍編集リンク先にアクセス
+        // 5. テスト: 書籍編集画面が正しく表示されているか確認
 
+        // 1
         $this->createTestDataFromSeeder();
         $user = User::whereHas('registeredBooks')->firstOrFail();
         $book = $user->registeredBooks()->firstOrFail();
         $editUrl = route('books.edit', $book);
 
-        // 1,2
+        // 2,3
         $this->actingAs($user)
             ->get(route('books.show', $book))
             ->assertOk()
             ->assertViewIs('books.show')
             ->assertSee('href="' . $editUrl . '"', false);
 
-        // 3,4
+        // 4,5
         $this->get($editUrl)
             ->assertOk()
             ->assertViewIs('books.edit')
             ->assertViewHas('book', fn (Book $shownBook) => $shownBook->is($book));
     }
-    /** 自分が登録した書籍の「削除」ボタンを押下する */
-    public function testOwnBookDelete(): void {
-        // 1. 認証ユーザーとして、自分の登録した書籍詳細画面にアクセス
-        // 2. テスト: 対象書籍の削除フォームと削除ボタンが存在する
-        // 3. 削除フォームの送信先にDELETEリクエストを送る
-        // 4. テスト: 対象書籍が削除され、書籍一覧画面に遷移し、削除が反映されている
 
+    /**
+     * 自分が登録した書籍の「削除」ボタンを押下する
+     */
+    public function testOwnBookDelete(): void {
+        // 1. テストデータ作成
+        // 2. 認証ユーザーとして、自分の登録した書籍詳細画面にアクセス
+        // 3. テスト: 対象書籍の削除フォームと削除ボタンが存在する
+        // 4. 削除フォームの送信先にDELETEリクエストを送る
+        // 5. テスト: 対象書籍が削除され、書籍一覧画面に遷移し、削除が反映されている
+
+        // 1
         $this->createTestDataFromSeeder();
         $user = User::whereHas('registeredBooks')->firstOrFail();
         $book = $user->registeredBooks()->firstOrFail();
         $deleteUrl = route('books.destroy', $book);
         $indexUrl = route('books.index');
 
-        // 1
+        // 2
         $response = $this->actingAs($user)
             ->get(route('books.show', $book))
             ->assertOk()
             ->assertViewIs('books.show');
 
-        // 2
-        $document = new \DOMDocument();
+        // 3
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . $deleteUrl . '"]');
@@ -483,10 +518,10 @@ class ShowBookTest extends TestCase
         $this->assertCount(1, $xpath->query('.//input[@name="_method" and @value="DELETE"]', $forms->item(0)));
         $this->assertSame('削除', $xpath->evaluate('normalize-space(.//button)', $forms->item(0)));
 
-        // 3
+        // 4
         $deleteResponse = $this->delete($deleteUrl);
 
-        // 4
+        // 5
         $deleteResponse->assertRedirect($indexUrl)
             ->assertSessionHas('success', '書籍を削除しました。');
         $this->assertDatabaseMissing('books', ['id' => $book->id]);
@@ -497,7 +532,9 @@ class ShowBookTest extends TestCase
             ->assertDontSee('href="' . route('books.show', $book) . '"', false);
     }
 
-    /** 自分以外が登録した書籍に「編集」「削除」ボタンが表示されない */
+    /**
+     * 自分以外が登録した書籍に「編集」「削除」ボタンが表示されない
+     */
     public function testOtherBookActionsHidden(): void {
         // 1. Seederから一連のテストデータを作成
         // 2. 書籍の登録者とは別のユーザーを作成
@@ -506,6 +543,7 @@ class ShowBookTest extends TestCase
 
         // 1
         $this->createTestDataFromSeeder();
+
         // 2
         $user = User::factory()->create();
         $book = Book::where('user_id', '!=', $user->id)->firstOrFail();
@@ -524,7 +562,6 @@ class ShowBookTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,

@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUpdateReviewRequest;
 use App\Models\Book;
 use App\Models\Review;
-use App\Http\Requests\StoreUpdateReviewRequest;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ReviewController extends Controller
 {
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUpdateReviewRequest $request, Book $book) {
-        // 書籍に対してレビューが既に投稿済みならエラーメッセージ表示
+    public function store(StoreUpdateReviewRequest $request, Book $book): RedirectResponse {
+        // 同一ユーザーが、同一書籍に対してレビューを既に投稿済みなら、エラーメッセージ表示
         if ($book->reviews()->where('user_id', $request->user()->id)->exists()) {
             return redirect(route('books.show', ['book' => $book]))
                 ->with('error', 'この書籍に対して既にレビュー投稿済みです。');
@@ -31,7 +33,7 @@ class ReviewController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Review $review) {
+    public function edit(Review $review): View {
         $this->authorize('update', $review);
 
         return View('reviews.edit', ['review' => $review]);
@@ -40,7 +42,7 @@ class ReviewController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreUpdateReviewRequest $request, Review $review) {
+    public function update(StoreUpdateReviewRequest $request, Review $review): RedirectResponse {
         $this->authorize('update', $review);
         $review->update($request->validated());
 
@@ -51,7 +53,7 @@ class ReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Review $review) {
+    public function destroy(Review $review): RedirectResponse {
         $this->authorize('delete', $review);
         $review->delete();
 

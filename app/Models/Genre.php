@@ -15,8 +15,7 @@ class Genre extends Model
     ];
 
     /**
-     * ジャンル
-     * @return BelongsToMany
+     * このジャンルに紐ついている書籍
      */
     public function books(): BelongsToMany {
         // 中間テーブル名(book_genre)、外部キーは規約通りのため省略

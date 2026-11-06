@@ -2,17 +2,18 @@
 
 namespace Tests\Feature\BookManager;
 
-use App\Models\User;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Models\User;
 use Carbon\Carbon;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\GenreSeeder;
 use Database\Seeders\BookSeeder;
-use Database\Seeders\ReviewSeeder;
 use Database\Seeders\FavoriteSeeder;
+use Database\Seeders\GenreSeeder;
 use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\ReviewSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class CreateBookTest extends TestCase
@@ -20,23 +21,31 @@ class CreateBookTest extends TestCase
     use RefreshDatabase;
 
     public const TITLE = 'テスト本';
+
     public const AUTHOR = 'テスト';
+
     public const ISBN = '9780000000000';
+
     public const PUBLISHED_DATE = '2026-01-01';
+
     public const GENRE_NAMES = ['小説'];
-    public const IMGAE_URL = 'https://placehold.co/200x300/e2e8f0/475569?text=99';
+
+    public const IMAGE_URL = 'https://placehold.co/200x300/e2e8f0/475569?text=99';
+
     public const DESCRIPTION = 'テスト説明';
 
-
+    /**
+     * 引数に与えられた内容で書籍登録urlにPOST送信
+     */
     private function postCreateBook(
-        $title = self::TITLE,
-        $author = self::AUTHOR,
-        $isbn = self::ISBN,
-        $publishDate = self::PUBLISHED_DATE,
-        $genreNames = self::GENRE_NAMES,
-        $imageUrl = self::IMGAE_URL,
-        $description = self::DESCRIPTION,
-    ) {
+        mixed $title = self::TITLE,
+        mixed $author = self::AUTHOR,
+        mixed $isbn = self::ISBN,
+        mixed $publishDate = self::PUBLISHED_DATE,
+        mixed $genreNames = self::GENRE_NAMES,
+        mixed $imageUrl = self::IMAGE_URL,
+        mixed $description = self::DESCRIPTION,
+    ): TestResponse {
         // テストはわかりやすいように名称選択としている
         // PostデータにはIDが必要なのでID配列に変換
         $ids = Genre::whereIn('name', $genreNames)
@@ -55,7 +64,9 @@ class CreateBookTest extends TestCase
             ]);
     }
 
-    /** 書籍登録画面が表示される */
+    /**
+     * 書籍登録画面が表示される
+     */
     public function testCreateView(): void {
         // 1. Seederからテストデータを作成する
         // 2. 認証ユーザーとして書籍登録画面にアクセス
@@ -74,7 +85,7 @@ class CreateBookTest extends TestCase
             ->assertViewIs('books.create');
 
         // 3
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
         $forms = $xpath->query('//form[@action="' . route('books.store') . '"]');
@@ -103,7 +114,9 @@ class CreateBookTest extends TestCase
         $this->assertSame('登録', $xpath->evaluate('normalize-space(.)', $buttons->item(0)));
     }
 
-    /** 正常な入力をして「登録」ボタンの押下で書籍が正常に登録される */
+    /**
+     * 正常な入力内容で「登録」ボタン押下で書籍が正常に登録される
+     */
     public function testCreateBook(): void {
         // 1. Seederからテストデータ作成
         // 2. 作成されたユーザーで認証
@@ -169,7 +182,9 @@ class CreateBookTest extends TestCase
             ->assertSeeText('書籍を登録しました。');
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(title編) */
+    /**
+     * titleフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     */
     public function testTitleValidation(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてtitleを空にしてpostアクセス
@@ -205,7 +220,9 @@ class CreateBookTest extends TestCase
         $this->assertDatabaseCount('books', $bookCount);
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(author編) */
+    /**
+     * authorフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     *  */
     public function testAuthorValidation(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてauthorを空にしてpostアクセス
@@ -241,7 +258,9 @@ class CreateBookTest extends TestCase
         $this->assertDatabaseCount('books', $bookCount);
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(isbn編) */
+    /**
+     * isbnフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     */
     public function testIsbnValidation(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてisbnを空にしてpostアクセス
@@ -277,7 +296,10 @@ class CreateBookTest extends TestCase
         }
     }
 
-    /** published_dateはnull許容である(応用編変更内容テスト) */
+    /**
+     * published_dateフィールドを未入力でPOST送信したとき、登録処理に成功する
+     * 応用機能時のテスト
+     */
     public function testPublishedDateNullable(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてpublished_dateを空にしてpostアクセス
@@ -307,21 +329,12 @@ class CreateBookTest extends TestCase
             ->assertSeeText(self::AUTHOR)
             ->assertSeeText(self::ISBN)
             ->assertSeeText(self::DESCRIPTION)
-            ->assertSee(self::IMGAE_URL);
-
-
-        // $this->from($createUrl)->postCreateBook(publishDate: '')
-        //     ->assertRedirect($createUrl)
-        //     ->assertSessionHasErrors(['published_date' => '出版日を入力してください'])
-        //     ->assertSessionDoesntHaveErrors(['title', 'author', 'isbn', 'genres']);
-
-        // $this->get($createUrl)
-        //     ->assertOk()
-        //     ->assertSeeText('出版日を入力してください');
-        // $this->assertDatabaseCount('books', $bookCount);
+            ->assertSee(self::IMAGE_URL);
     }
 
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(genres編) */
+    /**
+     * genresフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     */
     public function testGenresValidation(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてgenresを空にしてpostアクセス
@@ -342,8 +355,9 @@ class CreateBookTest extends TestCase
         $this->assertDatabaseCount('books', $bookCount);
     }
 
-
-    /** 不正項目の入力に対して、バリデーションメッセージが表示される(image_url編) */
+    /**
+     * genresフィールドを不正なリクエストでPOST送信したとき、登録処理に失敗する
+     */
     public function testImageUrlValidation(): void {
         // 1. テストデータを作成する
         // 2. 認証ユーザーとしてimage_urlを'https:/test'にしてpostアクセス
@@ -377,7 +391,6 @@ class CreateBookTest extends TestCase
      * seederからテストデータ生成
      */
     private function createTestDataFromSeeder(): void {
-        // シーダーからテストデータを作成する
         $this->seed([
             UserSeeder::class,
             GenreSeeder::class,

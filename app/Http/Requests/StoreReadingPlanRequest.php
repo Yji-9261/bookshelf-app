@@ -16,8 +16,6 @@ class StoreReadingPlanRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
@@ -25,21 +23,24 @@ class StoreReadingPlanRequest extends FormRequest
                 'required',
                 'integer',
                 'exists:books,id',
-                Rule::unique('reading_plans')->where('user_id', $this->user()->id)
+                Rule::unique('reading_plans')->where('user_id', $this->user()->id),
             ],
-            'target_date' => ['required', 'date_format:Y-m-d']
+            'target_date' => ['required', 'date_format:Y-m-d'],
         ];
     }
 
-    public function messages() {
+    /**
+     * バリデーションメッセージ
+     */
+    public function messages(): array {
         return [
             'book_id.required' => '書籍を入力してください',
             'book_id.integer' => '数値を入力してください',
-            'book_id.exsits' => '書籍が存在しません',
-            'book_id.unique' => 'この書籍は既に進行中の読書計画が存在します',
+            'book_id.exists' => '書籍が存在しません',
+            'book_id.unique' => 'この書籍に対する読書計画は既に存在します',
 
             'target_date.required' => '期日を入力してください',
-            'target_date.date_format' => '出版日をyyyy-mm-dd形式で入力してください',
+            'target_date.date_format' => '期日をyyyy-mm-dd形式で入力してください',
         ];
     }
 }

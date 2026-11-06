@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Enums\Sort;
+use Illuminate\Validation\Rule;
 
 class IndexBookRequest extends FormRequest
 {
@@ -16,26 +16,19 @@ class IndexBookRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array {
         return [
             'keyword' => ['nullable', 'sometimes', 'string', 'max:255'],
-            'genre' => ['nullable', 'sometimes', 'integer'],
-            'sort' => ['nullable', 'sometimes', 'string'],
+            'genre' => ['nullable', 'sometimes', 'integer', 'exists:genres,id'],
+            'sort' => ['nullable', 'sometimes', 'string',
+                Rule::in([
+                    'newest',
+                    'oldest',
+                    'rating',
+                    'title',
+                ]),
+            ],
         ];
     }
-
-    // public function messages()
-    // {
-    //     return [
-    //         'keyword.string' => 'キーワードは文字列で入力して下さい',
-    //         'keyword.max' => 'キーワードを255文字以内で入力してください',
-
-    //         'genre.exists' => 'ジャンルが存在しません',
-
-    //         'sort.in' => '並び順を選択してください',
-    //     ];
-    // }
 }

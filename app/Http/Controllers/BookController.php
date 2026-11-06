@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
-use App\Models\Genre;
 use App\Http\Requests\IndexBookRequest;
 use App\Http\Requests\StoreUpdateBookRequest;
+use App\Models\Book;
+use App\Models\Genre;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class BookController extends Controller
 {
@@ -17,19 +19,18 @@ class BookController extends Controller
      * Display a listing of the resource.
      */
     public function index(IndexBookRequest $request): View {
-        // title,authorが半角英数字で、スペースなく断続した場合
-        // 文字列が他の書籍欄まではみ出してしまう問題を確認
-        // バックエンドのみでの対応は難しいことを理由に、仕様とすることをPMと取り決めた
-
         $validated = $request->validated();
 
         // reviews_avg_rating(評価平均点)付与
-        $books = Book::query()->withAvg('reviews', 'rating')
+        $books = Book::query()
+            ->with('genres')
+            ->withAvg('reviews', 'rating')
+
             // keyword検索
             ->when(
-                $validated['keyword'] ?? null,
+                // キーワードに0が指定されても実行できるようにstrに変換
+                isset($validated['keyword']) ? str($validated['keyword']) : null,
                 function ($query, $keyword) {
-                    // whereで囲んでorWhere以降の検索優先順位を保護
                     $query->where(function ($query) use ($keyword) {
                         $query->where('title', 'LIKE', "%{$keyword}%")
                             ->orWhere('author', 'LIKE', "%{$keyword}%");
@@ -53,8 +54,8 @@ class BookController extends Controller
                 $validated['sort'] ?? null,
                 function ($query, $sort) {
                     return match ($sort) {
-                        'newest' => $query->orderBy('created_at', 'desc'),
-                        'oldest' => $query->orderBy('created_at', 'asc'),
+                        'newest' => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'),
+                        'oldest' => $query->orderBy('created_at', 'asc')->orderBy('id', 'asc'),
                         'rating' => $query->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc'),
                         'title' => $query->orderBy('title', 'asc'),
                     };
@@ -74,7 +75,7 @@ class BookController extends Controller
      */
     public function create(): View {
         return View('books.create', [
-            'genres' => Genre::all()
+            'genres' => Genre::all(),
         ]);
     }
 
@@ -90,6 +91,7 @@ class BookController extends Controller
 
             // 登録済みのジャンルIDが１つ以上はリクエストされるので書籍に紐つけ
             $book->genres()->sync($validated['genres']);
+
             return $book;
         });
 
@@ -102,12 +104,14 @@ class BookController extends Controller
      * Display the specified resource.
      */
     public function show(Book $book): View {
-        // titleが半角英数字で、スペースなく断続した場合、
-        // 文字列が枠外にはみ出し、お気に入りボタンも押下できなくなってしまう問題を確認
-        // バックエンドのみでの対応は難しいことを理由に、仕様とすることをPMと取り決めた
+        $book->load([
+            'genres',
+            'reviews.user',
+            'reviews.likedByUsers',
+        ]);
 
         return View('books.show', [
-            'book' => $book
+            'book' => $book,
         ]);
     }
 
@@ -116,9 +120,10 @@ class BookController extends Controller
      */
     public function edit(Book $book): View {
         $this->authorize('update', $book);
+
         return view('books.edit', [
             'book' => $book,
-            'genres' => Genre::all()
+            'genres' => Genre::all(),
         ]);
     }
 
@@ -126,9 +131,9 @@ class BookController extends Controller
      * Update the specified resource in storage.
      */
     public function update(StoreUpdateBookRequest $request, Book $book): RedirectResponse {
-        $this->authorize('update', $book);
-
         DB::transaction(function () use ($request, $book) {
+            $this->authorize('update', $book);
+
             $validated = $request->validated();
             $book->update($validated);
 
@@ -152,36 +157,54 @@ class BookController extends Controller
     }
 
     /**
-     * 指定のISBNにてGooglBooksAPIにアクセスし、対象書籍の情報をjsに返す処理
-     * @param string $isbn
+     * 指定のISBNにてGooglBooksAPIにアクセスし、対象書籍の情報、またはエラーメッセージをjsに返す
+     *
+     * @param  string  $isbn  13桁の半角数字
      * @return array
      */
-    public function getBookInformation(string $isbn) {
-        // 2026/10/21 GoogleBooksApiのisbnを指定した検索に不具合が生じている模様
-        // https://issuetracker.google.com/issues/569300353
-        // 実際にisbn検索しても0件しか取れないため
-        // 代わりにデザインパターン」キーワード検索の結果を取得し、テストした
+    public function getBookInformation(string $isbn): array|JsonResponse {
+        // 正常時のHTTPステータスコード
+        $statusCode = 200;
+        $apiKey = config('services.google.books_api_key');
 
-        $apiKey = env('GOOGLE_BOOK_API_KEY');
-        $request = Http::get('https://www.googleapis.com/books/v1/volumes', [
-            'q' => "isbn:{$isbn}",
-            //'q' => "デザインパターン",
-            'maxResults' => 1,
-            'key' => $apiKey,
-        ]);
+        try {
+            $request = Http::get('https://www.googleapis.com/books/v1/volumes', [
+                'q' => "isbn:{$isbn}",
+                'maxResults' => 1,
+                'key' => $apiKey,
+            ]);
+
+            // 400~599のエラー発生時
+            if ($request->failed()) {
+                // js側ではstatusCodeは扱わないので、200以外ならなんでもよい
+                // HTTPエラーとして500を返すこととする
+                $statusCode = 500;
+            }
+        } catch (ConnectionException $e) {
+            // js側ではstatusCodeは扱わないので、200以外ならなんでもよいが
+            // 通信エラーとして502を返すこととする
+            $statusCode = 502;
+        }
+
+        if ($statusCode !== 200) {
+            return response()->json([
+                'error' => '通信エラーが発生しました。',
+            ], $statusCode);
+        }
 
         // isbn検索はデータ数は１件で確定しているためitemsの0を指定して配列を取得
         $volumeInfo = $request->json('items.0.volumeInfo');
+
         return [
-            'title' => $volumeInfo['title'],
+            'title' => $volumeInfo['title'] ?? '',
 
             // 共著などがあるため配列で複数件返ってくる可能性がある。
-            // PMとカンマ区切りとする取り決めとした
-            'author' => implode(',', $volumeInfo['authors']),
+            // PMとカンマ区切りとする取り決めをした
+            'author' => implode(',', $volumeInfo['authors'] ?? []),
 
-            'description' => $volumeInfo['description'],
-            'image_url' => $volumeInfo['imageLinks']['thumbnail'],
-            'published_date' => $volumeInfo['publishedDate'],
+            'description' => $volumeInfo['description'] ?? '',
+            'image_url' => $volumeInfo['imageLinks']['thumbnail'] ?? '',
+            'published_date' => $volumeInfo['publishedDate'] ?? '',
         ];
     }
 }

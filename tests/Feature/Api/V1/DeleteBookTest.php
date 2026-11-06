@@ -30,26 +30,8 @@ class DeleteBookTest extends TestCase
     }
 
     /**
-     * 書籍登録者以外のユーザーは書籍を削除できない
+     * 書籍登録ユーザーが登録した書籍に対しAPI書籍削除を実行し、削除に成功する
      */
-    public function testCannotDeleteOthersBook(): void {
-        $book = Book::factory()->create();
-        $otherUser = User::factory()->create();
-
-        // DB内に登録している書籍数を取得
-        $bookCount = Book::count();
-
-        // 書籍登録者でないユーザーが認証し、対象書籍削除のpostを送信し403であることを検証
-        Sanctum::actingAs($otherUser, ['*']);
-        $this->deleteJson('/api/v1/books/' . $book->id)
-            ->assertForbidden();
-
-        // DB内の書籍数に変更がないか確認
-        $this->assertDatabaseCount('books', $bookCount);
-    }
-
-
-    /** API書籍詳細を取得し期待通りのレスポンスが返ってくる */
     public function testBooksDelete(): void {
         // 1. 1件の書籍を作成する
         // 2. DELETE /api/v1/books/{book}にアクセス
@@ -69,7 +51,9 @@ class DeleteBookTest extends TestCase
         $this->assertDatabaseEmpty('books');
     }
 
-    /** 存在しない書籍のAPI書籍詳細を実行した時、期待通りのエラーレスポンスが返ってくる */
+    /**
+     * 存在しない書籍に対してAPI書籍削除を実行した時、期待通りのエラーレスポンスが返ってくる
+     */
     public function testBookNotFound(): void {
         // 1. 1件の書籍を作成する
         // 2. DELETE /api/v1/books/2にアクセス
@@ -84,5 +68,32 @@ class DeleteBookTest extends TestCase
             ->assertJson([
                 'error' => '書籍情報が見つかりませんでした。',
             ]);
+    }
+
+    /**
+     * 認証ユーザーは他ユーザーが登録した書籍を削除できない
+     */
+    public function testCannotDeleteOthersBook(): void {
+        // 1. ユーザーを作成し、そのユーザーが登録した書籍を作成する
+        // 2. もう一名ユーザーを作成し認証する
+        // 3. 作成した書籍に削除APIを実行する
+        // 4. テスト:削除に失敗する
+
+        // 1
+        $book = Book::factory()->create();
+
+        // DB内に一件だけ書籍が登録されていることを確認
+        $bookCount = Book::count();
+        $this->assertSame(1, $bookCount);
+
+        // 2
+        Sanctum::actingAs(User::factory()->create(), ['*']);
+
+        // 3,4
+        $this->deleteJson('/api/v1/books/' . $book->id)
+            ->assertForbidden();
+
+        // DB内の書籍数に変更がないか確認
+        $this->assertDatabaseCount('books', $bookCount);
     }
 }

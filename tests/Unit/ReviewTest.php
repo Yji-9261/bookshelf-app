@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Models\User;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ReviewTest extends TestCase
 {
@@ -13,7 +13,7 @@ class ReviewTest extends TestCase
     /**
      * userのリレーションが適切か
      */
-    public function test_user(): void {
+    public function testUser(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -22,7 +22,6 @@ class ReviewTest extends TestCase
          *    $review->user()->whereKey($user->id)->exists()がtrue
          * ※ DBテーブルの保存検証はUserTestで行っているため省略
          */
-
         $user = User::create([
             'name' => 'user1',
             'email' => 'user1@example.com',
@@ -48,7 +47,7 @@ class ReviewTest extends TestCase
     /**
      * bookのリレーションが適切か
      */
-    public function test_book(): void {
+    public function testBook(): void {
         /**
          * 1. $user = User::create([...])で作成
          * 2. $book = $user->registeredBooks()->create([...])で書籍作成
@@ -97,7 +96,7 @@ class ReviewTest extends TestCase
     /**
      * likedByUsersのリレーションが適切か
      */
-    public function test_likedByUsers(): void {
+    public function testLikedByUsers(): void {
         /**
          * 1. 投稿者$authorと、いいねする$userをUser::create([...])で作成
          * 2. $book = $author->registeredBooks()->create([...])で書籍生成

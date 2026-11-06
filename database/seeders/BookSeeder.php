@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Genre;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class BookSeeder extends Seeder
 {
@@ -16,7 +16,7 @@ class BookSeeder extends Seeder
             'published_date' => '1905-01-01',
             'ジャンル' => ['小説'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=1',
-            'description' => '夏目漱石の長編小説であり、処女小説である。'
+            'description' => '夏目漱石の長編小説であり、処女小説である。',
         ],
 
         [
@@ -26,7 +26,7 @@ class BookSeeder extends Seeder
             'published_date' => '1936-10-01',
             'ジャンル' => ['ビジネス', '自己啓発'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=2',
-            'description' => 'デール・カーネギーの代表的な著書。自己啓発書の元祖と称されることも多い。'
+            'description' => 'デール・カーネギーの代表的な著書。自己啓発書の元祖と称されることも多い。',
         ],
 
         [
@@ -47,7 +47,7 @@ class BookSeeder extends Seeder
             'published_date' => '2013-08-30',
             'ジャンル' => ['ビジネス', '自己啓発'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=4',
-            'description' => 'ジャンルはビジネス書とされる場合が多いが、成功哲学、人生哲学、自助努力といった人間の生活を広く取り扱っており、人文・思想、倫理・道徳、人生論・教訓、自己啓発などに分類される場合もある。'
+            'description' => 'ジャンルはビジネス書とされる場合が多いが、成功哲学、人生哲学、自助努力といった人間の生活を広く取り扱っており、人文・思想、倫理・道徳、人生論・教訓、自己啓発などに分類される場合もある。',
         ],
 
         [
@@ -57,7 +57,7 @@ class BookSeeder extends Seeder
             'published_date' => '1906-04-01',
             'ジャンル' => ['小説'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=5',
-            'description' => '登場する人物の描写が滑稽で、わんぱく坊主のいたずらあり、悪口雑言あり、暴力沙汰あり、痴情のもつれあり、義理人情ありと、他の漱石作品と比べて大衆的であり、難解なものが多い漱石作品の中では比較的平易であり、最も多くの人に愛読されている作品と評価されている。'
+            'description' => '登場する人物の描写が滑稽で、わんぱく坊主のいたずらあり、悪口雑言あり、暴力沙汰あり、痴情のもつれあり、義理人情ありと、他の漱石作品と比べて大衆的であり、難解なものが多い漱石作品の中では比較的平易であり、最も多くの人に愛読されている作品と評価されている。',
         ],
 
         [
@@ -68,7 +68,7 @@ class BookSeeder extends Seeder
             'ジャンル' => ['歴史', '科学'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=6',
             'description' => 'この書籍はホモ・サピエンスについて扱い、石器時代から21世紀までの人類の歴史を概観するものである。自然科学、特に進化生物学の観点からもそのテーマが語られる。
-'
+',
         ],
 
         [
@@ -78,7 +78,7 @@ class BookSeeder extends Seeder
             'published_date' => '2017-12-18',
             'ジャンル' => ['技術書'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=7',
-            'description' => 'コードを書き、読み、洗練する。'
+            'description' => 'コードを書き、読み、洗練する。',
         ],
 
         [
@@ -88,7 +88,7 @@ class BookSeeder extends Seeder
             'published_date' => '2013-12-13',
             'ジャンル' => ['自己啓発'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=8',
-            'description' => '岸見一郎と古賀史健の共著による、アルフレッド・アドラーの「アドラー心理学」を解説した書籍。2013年12月13日にダイヤモンド社より出版された。'
+            'description' => '岸見一郎と古賀史健の共著による、アルフレッド・アドラーの「アドラー心理学」を解説した書籍。2013年12月13日にダイヤモンド社より出版された。',
         ],
 
         [
@@ -98,7 +98,7 @@ class BookSeeder extends Seeder
             'published_date' => '2015-03-11',
             'ジャンル' => ['小説'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=9',
-            'description' => '又吉直樹による中編小説。お笑い芸人の小説が芥川龍之介賞を取り話題となったことで、2026年には部数354万部を突破した。'
+            'description' => '又吉直樹による中編小説。お笑い芸人の小説が芥川龍之介賞を取り話題となったことで、2026年には部数354万部を突破した。',
         ],
 
         [
@@ -108,7 +108,7 @@ class BookSeeder extends Seeder
             'published_date' => '2019-01-11',
             'ジャンル' => ['ビジネス', '科学'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=10',
-            'description' => 'ファクトフルネスとは――データや事実にもとづき、世界を読み解く習慣。賢い人ほどとらわれる10の思い込みから解放されれば、癒され、世界を正しく見るスキルが身につく。'
+            'description' => 'ファクトフルネスとは――データや事実にもとづき、世界を読み解く習慣。賢い人ほどとらわれる10の思い込みから解放されれば、癒され、世界を正しく見るスキルが身につく。',
         ],
 
         [
@@ -118,7 +118,7 @@ class BookSeeder extends Seeder
             'published_date' => '2007-01-18',
             'ジャンル' => ['ビジネス', '歴史'],
             'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text=11',
-            'description' => '20世紀最大の発明品の１つといわれるのがコンテナ。コンテナの海上輸送が始まったのは1956年3月のことだ。'
+            'description' => '20世紀最大の発明品の１つといわれるのがコンテナ。コンテナの海上輸送が始まったのは1956年3月のことだ。',
         ],
     ];
 
@@ -126,6 +126,8 @@ class BookSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void {
+        $users = User::all();
+
         foreach ($this->initialValues as $value) {
             // ジャンル名から該当するID群を取得する
             $genreIds = Genre::whereIn('name', $value['ジャンル'])->pluck('id');
@@ -133,7 +135,7 @@ class BookSeeder extends Seeder
             // firstOrCreateに余計な'ジャンル'キーを削除
             unset($value['ジャンル']);
 
-            User::all()->random()
+            $users->random()
                 ->registeredBooks()
                 ->firstOrCreate($value)
                 ->genres()

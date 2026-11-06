@@ -19,10 +19,6 @@ class BookController extends Controller
      * Display a listing of the resource.
      */
     public function index(IndexBookRequest $request): View {
-        // title,authorが半角英数字で、スペースなく断続した場合
-        // 文字列が他の書籍欄まではみ出してしまう問題を確認
-        // バックエンドのみでの対応は難しいために、仕様とすることをPMと取り決めた
-
         $validated = $request->validated();
 
         // reviews_avg_rating(評価平均点)付与
@@ -108,9 +104,6 @@ class BookController extends Controller
      * Display the specified resource.
      */
     public function show(Book $book): View {
-        // titleが半角英数字で、スペースなく断続した場合、
-        // 文字列が枠外にはみ出し、お気に入りボタンも押下できなくなってしまう問題を確認
-        // バックエンドのみでの対応は難しいことを理由に、仕様とすることをPMと取り決めた
         $book->load([
             'genres',
             'reviews.user',
@@ -170,11 +163,6 @@ class BookController extends Controller
      * @return array
      */
     public function getBookInformation(string $isbn): array|JsonResponse {
-        // https://issuetracker.google.com/issues/569300353
-        // 2026/10/21 GoogleBooksApiのisbnを指定した検索に不具合が生じている模様
-        // isbn検索しても0件しか取れない
-        // 2026/11/3 取得できるようになっています
-
         // 正常時のHTTPステータスコード
         $statusCode = 200;
         $apiKey = config('services.google.books_api_key');
@@ -188,11 +176,13 @@ class BookController extends Controller
 
             // 400~599のエラー発生時
             if ($request->failed()) {
-                // 外部APIのHTTPエラーを検出した場合は502を返す
-                $statusCode = 502;
+                // js側ではstatusCodeは扱わないので、200以外ならなんでもよい
+                // HTTPエラーとして500を返すこととする
+                $statusCode = 500;
             }
         } catch (ConnectionException $e) {
-            // 接続エラーなので502とする
+            // js側ではstatusCodeは扱わないので、200以外ならなんでもよいが
+            // 通信エラーとして502を返すこととする
             $statusCode = 502;
         }
 
